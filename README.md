@@ -10,3 +10,10 @@ Requirements:
     - bader bin path
     - HOMO charge path
     - BerkeleyGW bin and exciton wfn path
+
+Some external resources:
+    - cube file explanation: http://paulbourke.net/dataformats/cube/
+    - Bader implementation we used: http://theory.cm.utexas.edu/henkelman/code/bader/
+
+DO NOT FORGET:
+    - cube file has Bohr and Angstrom units, FHI-aims use Bohr (at least for my output file), remember to convert it to Angstrom
