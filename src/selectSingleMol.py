@@ -3,6 +3,7 @@ from ase.build import make_supercell
 from filepath import *
 import linecache
 from copy import deepcopy
+import numpy as np
 # ase has some problem in its make supercell function so we have
 # switch to pymatgen
 from pymatgen.io.ase import AseAtomsAdaptor
@@ -14,15 +15,7 @@ def getFineGrid(path):
         fineGrid[i] = int(fineGrid[i])
     return fineGrid
 
-if __name__ == "__main__":
-
-    print('To users: please make sure you type in correct path for necessary files in \"filepath.py\"')
-    
-    # decide the fine grid
-    if fineGrid == []:
-        fineGrid = getFineGrid(fineGridpath)
-    
-    # read in the structure file and construct the super cell
+def constructSuperCell(QEinputPath, fineGrid):
     # ase has some problem in its super cell constructing function
     # here switch to pymatgen
     structure = read(QEinputPath)
@@ -30,7 +23,28 @@ if __name__ == "__main__":
     pymatgenObject = AseAtomsAdaptor()
     pymatgenStruct = pymatgenObject.get_structure(structure)
     pymatgenStruct.make_supercell(fineGrid)
-    pymatgenStruct.to(filename='test.cif')
+    # pymatgenStruct.to(filename='pymatgenSuperCell.cif')
+    return pymatgenStruct
+
+def getSingleMol(supercell):
+    # find site in the middle
+    dist = 1
+    middle = [0.5, 0.5, 0.5]
+    for site in supercell.sites:
+        if np.linalg.norm(middle-site.frac_coords) < dist:
+            dist = np.linalg.norm(middle-site.frac_coords)
+            middleSite = site
+    print('The site closest to the middle is', middleSite)
+    return None
+
+if __name__ == "__main__":
+
+    print('To users: please make sure you type in correct path for necessary files in \"filepath.py\"')
     
-    
-    
+    # decide the fine grid
+    if fineGrid == []:
+        fineGrid = getFineGrid(fineGridpath)
+    # read in the structure file and construct the super cell
+    supercell = constructSuperCell(QEinputPath, fineGrid)
+    # get the single molecule from the super cell in the middle
+    singleMol = getSingleMol(supercell)
