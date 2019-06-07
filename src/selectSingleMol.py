@@ -16,10 +16,10 @@ def getBondDict(supercell, bondCutoff):
     speciesList = list(set(supercell.species))
     for i in range(len(speciesList)):
         speciesList[i] = str(speciesList[i])
-    for ele in speciesList:
-        for pairs in bondCutoff.keys():
-            if (ele in pairs) and (pairs not in bondDict):
-                bondDict[pairs] = bondCutoff[pairs]
+    for a in speciesList:
+        for b in speciesList:
+            if (a, b) in bondCutoff.keys():
+                bondDict[(a, b)] = bondCutoff[(a, b)]
     duplicate = dict()
     for pairs in bondDict.keys():
         (a, b) = pairs
@@ -46,7 +46,30 @@ def constructSuperCell(QEinputPath, fineGrid):
     # pymatgenStruct.to(filename='pymatgenSuperCell.cif')
     return pymatgenStruct
 
-def getSingleMol(supercell, bondDict):
+def getSingleMol(supercell, middleSite, bondDict):
+    candidates = [middleSite]
+    tmpSites = []
+    singleMol = []
+    while candidates != []:
+        for site in candidates:
+            for pair in bondDict.keys():
+                if str(site.specie) in pair:
+                    allNeighbors = supercell.get_neighbors(site, bondDict[pair])
+                    for neighbor in allNeighbors:
+                        sitePair = (str(site.specie), str(neighbor[0].specie))
+                        if neighbor[1] <= bondDict[sitePair]:
+                            tmpSites += [neighbor[0]]
+        singleMol += candidates
+        print(tmpSites)
+        print(stop)
+        for site in tmpSites:
+            if site not in singleMol:
+                candidates += [site]
+        tmpSites = []
+        print(singleMol)
+    return None
+
+def getCentralSingleMol(supercell, bondDict):
     # find site in the middle
     dist = 1
     middle = [0.5, 0.5, 0.5]
@@ -54,14 +77,18 @@ def getSingleMol(supercell, bondDict):
         if np.linalg.norm(middle-site.frac_coords) < dist:
             dist = np.linalg.norm(middle-site.frac_coords)
             middleSite = site
-    print(site.frac_coords)
-    print(site.coords)
-    print(site.specie)
+    # print(site.frac_coords)
+    # print(site.coords)
+    # print(site.specie)
     site1 = supercell.sites[0]
-    print(supercell.get_neighbors(site1, 1))
+    site2 = supercell.sites[1]
+    print(site1, site2)
+    print(supercell.get_neighbors(site1, 1.5))
     print('The site closest to the middle is', middleSite)
-    MolEleList = []
-    MolEleCoords = []
+    print(site1.distance(site2))
+    tmplist = [supercell.sites[0], supercell.sites[1]]
+    # pick up all the atom pairs within bond van der waals distance
+    # centralSingleMol = getSingleMol(supercell, middleSite, bondDict)
     return None
 
 if __name__ == "__main__":
@@ -75,4 +102,4 @@ if __name__ == "__main__":
     supercell = constructSuperCell(QEinputPath, fineGrid)
     # get the single molecule from the super cell in the middle
     bondDict = getBondDict(supercell, bondCutoff)
-    singleMol = getSingleMol(supercell, bondDict)
+    singleMol = getCentralSingleMol(supercell, bondDict)
