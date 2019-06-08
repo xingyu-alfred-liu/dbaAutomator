@@ -33,6 +33,7 @@ please type in:
     binary path, so dba_automator will copy the bin and run it 
     in a separate path, after the calculation is done, the bin will
     be deleted.
+    
 """
 
 # for single molecule processing
