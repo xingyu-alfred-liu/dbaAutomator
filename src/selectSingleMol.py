@@ -9,6 +9,8 @@ import numpy as np
 from pymatgen.io.ase import AseAtomsAdaptor
 from bondLengthRef import bondCutoff
 from pymatgen import Molecule
+from pymatgen.io.xyz import XYZ
+import os
 
 # getBondDict give the bond cutoff dict for supercell
 def getBondDict(supercell, bondCutoff):
@@ -52,22 +54,39 @@ def getSingleMol(supercell, middleSite, bondDict):
     singleMol = []
     while candidates != []:
         for site in candidates:
+            bondCutoffMax = 0
             for pair in bondDict.keys():
-                if str(site.specie) in pair:
-                    allNeighbors = supercell.get_neighbors(site, bondDict[pair])
-                    for neighbor in allNeighbors:
-                        sitePair = (str(site.specie), str(neighbor[0].specie))
-                        if neighbor[1] <= bondDict[sitePair]:
-                            tmpSites += [neighbor[0]]
+                if (bondDict[pair] >= bondCutoffMax) and (str(site.specie) in pair):
+                    bondCutoffMax = bondDict[pair]
+            allNeighbors = supercell.get_neighbors(site, bondCutoffMax)
+            for neighbor in allNeighbors:
+                sitePair = (str(site.specie), str(neighbor[0].specie))
+                if neighbor[1] <= bondDict[sitePair]:
+                    tmpSites += [neighbor[0]]
+        tmpSites = list(set(tmpSites))
         singleMol += candidates
-        print(tmpSites)
-        print(stop)
+        candidates = []
         for site in tmpSites:
             if site not in singleMol:
                 candidates += [site]
+        print('Number of atoms in this molecule:')
+        print(len(singleMol))
         tmpSites = []
-        print(singleMol)
-    return None
+    # while candidates != []:
+    #     for site in candidates:
+    #         for pair in bondDict.keys():
+    #             if str(site.specie) in pair:
+    #                 allNeighbors = supercell.get_neighbors(site, bondDict[pair])
+    #                 for neighbor in allNeighbors:
+    #                     sitePair = (str(site.specie), str(neighbor[0].specie))
+    #                     if neighbor[1] <= bondDict[sitePair]:
+    #                         tmpSites += [neighbor[0]]
+    #     singleMol += candidates
+    #     candidates = []
+    #     for site in tmpSites:
+    #         if site not in singleMol:
+    #             candidates += [site]
+    return singleMol
 
 def getCentralSingleMol(supercell, bondDict):
     # find site in the middle
@@ -80,16 +99,20 @@ def getCentralSingleMol(supercell, bondDict):
     # print(site.frac_coords)
     # print(site.coords)
     # print(site.specie)
-    site1 = supercell.sites[0]
-    site2 = supercell.sites[1]
-    print(site1, site2)
-    print(supercell.get_neighbors(site1, 1.5))
     print('The site closest to the middle is', middleSite)
-    print(site1.distance(site2))
-    tmplist = [supercell.sites[0], supercell.sites[1]]
     # pick up all the atom pairs within bond van der waals distance
-    # centralSingleMol = getSingleMol(supercell, middleSite, bondDict)
-    return None
+    # centralSingleMol is the list of sites which belong to the central molecule
+    centralSingleMol = getSingleMol(supercell, middleSite, bondDict)
+    return centralSingleMol
+
+def outputMolecule(singleMol, dataDir):
+    molecule = Molecule([], [])
+    for site in singleMol:
+        molecule.append(str(site.specie), site.coords)
+    xyzObj = XYZ(molecule)
+    os.chdir(dataDir)
+    os.system('mkdir singleMolecule')
+    xyzObj.write_file(dataDir+'/singleMolecule/singleMol.xyz')
 
 if __name__ == "__main__":
 
@@ -103,3 +126,5 @@ if __name__ == "__main__":
     # get the single molecule from the super cell in the middle
     bondDict = getBondDict(supercell, bondCutoff)
     singleMol = getCentralSingleMol(supercell, bondDict)
+    # otuput the single Molecule file
+    outputMolecule(singleMol, dataDir)

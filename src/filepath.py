@@ -39,6 +39,6 @@ please type in:
 QEinputPath = '/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/crystal/in'
 fineGridpath = '/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/crystal/kgrid.in'
 fineGrid = []
-
+dataDir = '/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data'
 # for bader analysis calculation
 baderPath = '/Users/alfredliu/Documents/Research/Software/Bader/macos/bader'
