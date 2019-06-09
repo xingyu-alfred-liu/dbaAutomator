@@ -33,7 +33,7 @@ please type in:
     binary path, so dba_automator will copy the bin and run it 
     in a separate path, after the calculation is done, the bin will
     be deleted.
-    
+
 """
 
 # for single molecule processing
@@ -43,3 +43,5 @@ fineGrid = []
 dataDir = '/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data'
 # for bader analysis calculation
 baderPath = '/Users/alfredliu/Documents/Research/Software/Bader/macos/bader'
+chargePath = "/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/singleMolecule/eigen_density185.cube"
+singleMolPath = "/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/singleMolecule"
