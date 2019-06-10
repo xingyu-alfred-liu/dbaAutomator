@@ -37,7 +37,10 @@ def getFineGrid(path):
         fineGrid[i] = int(fineGrid[i])
     return fineGrid
 
-def constructSuperCell(QEinputPath, fineGrid):
+def constructSuperCell(QEinputPath, fineGrid, fineGridpath):
+    # decide the fine grid
+    if fineGrid == []:
+        fineGrid = getFineGrid(fineGridpath)
     # ase has some problem in its super cell constructing function
     # here switch to pymatgen
     structure = read(QEinputPath)
@@ -104,11 +107,8 @@ if __name__ == "__main__":
 
     print('To users: please make sure you type in correct path for necessary files in \"filepath.py\"')
     
-    # decide the fine grid
-    if fineGrid == []:
-        fineGrid = getFineGrid(fineGridpath)
     # read in the structure file and construct the super cell
-    supercell = constructSuperCell(QEinputPath, fineGrid)
+    supercell = constructSuperCell(QEinputPath, fineGrid, fineGridpath)
     # get the single molecule from the super cell in the middle
     bondDict = getBondDict(supercell, bondCutoff)
     singleMol = getCentralSingleMol(supercell, bondDict)

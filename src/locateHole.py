@@ -5,12 +5,14 @@ bader analysis result (ACF.dat) and the unit cell.
 
 """
 from filepath import *
-from ase.io import read, write
 import os
 import numpy as np
+from selectSingleMol import constructSuperCell, getBondDict
+from pymatgen import Molecule
+from bondLengthRef import bondCutoff
 
 def loadSingleMol(singleMolPath):
-    singleMol = read(singleMolPath+'/singleMol.xyz')
+    singleMol = Molecule.from_file(singleMolPath+'/singleMol.xyz')
     return singleMol
 
 def getChargeMatrix(singleMol, singleMolPath):
@@ -28,7 +30,7 @@ def getChargeMatrix(singleMol, singleMolPath):
                 pass
     chargeMatrix = np.array(chargeMatrix)
     chargeMatrix = chargeMatrix.astype(float)
-    if singleMol.get_number_of_atoms() != len(chargeMatrix):
+    if singleMol.num_sites != len(chargeMatrix):
         print('!!! Error !!!')
         print('The number of atoms does not match with molecule number')
         return 0
@@ -37,7 +39,25 @@ def getChargeMatrix(singleMol, singleMolPath):
     # returned chargeMatrix provides the charge percentage and atom index
     return chargeMatrix
 
+# !!! important !!!
+# this function sets the charge percentage threshold as 1%
+def getHolePositions(chargeMatrix, singleMol, supercell, bondDict, chargeThreshold=0.1):
+    bondlength = 0
+    for key in bondDict:
+        if bondDict[key] >= bondlength:
+            bondlength = bondDict[key]
+    print(supercell.sites[0].frac_coords)
+    chargeIndex = np.where(chargeMatrix[:, 4] > chargeThreshold)[0]
+    holePositions = []
+    for charindex in chargeIndex:
+        chargeSite = singleMol.sites[charindex]
+        neighborSites = singleMol.get_neighbors(singleMol.sites[charindex], bondlength)
+    return None
+
 if __name__ == "__main__":
     singleMol = loadSingleMol(singleMolPath)
     chargeMatrix = getChargeMatrix(singleMol, singleMolPath)
-    
+    supercell = constructSuperCell(QEinputPath, fineGrid, fineGridpath)
+    # find out the fractional coordinates of hole positions
+    bondDict = getBondDict(supercell, bondCutoff)
+    holeSites = getHolePositions(chargeMatrix, singleMol, supercell, bondDict, chargeThreshold)

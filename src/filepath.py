@@ -34,6 +34,14 @@ please type in:
     in a separate path, after the calculation is done, the bin will
     be deleted.
 
+    - chargePath
+    string
+    The path to single molecule HOMO cube file
+
+    - singleMolPath
+    string
+    The path where the single molecule charge and bader analysis locates
+
 """
 
 # for single molecule processing
@@ -45,3 +53,4 @@ dataDir = '/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data'
 baderPath = '/Users/alfredliu/Documents/Research/Software/Bader/macos/bader'
 chargePath = "/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/singleMolecule/eigen_density185.cube"
 singleMolPath = "/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/singleMolecule"
+chargeThreshold = 0.01
