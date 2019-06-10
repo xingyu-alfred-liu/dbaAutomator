@@ -72,20 +72,6 @@ def getSingleMol(supercell, middleSite, bondDict):
         print('Number of atoms in this molecule:')
         print(len(singleMol))
         tmpSites = []
-    # while candidates != []:
-    #     for site in candidates:
-    #         for pair in bondDict.keys():
-    #             if str(site.specie) in pair:
-    #                 allNeighbors = supercell.get_neighbors(site, bondDict[pair])
-    #                 for neighbor in allNeighbors:
-    #                     sitePair = (str(site.specie), str(neighbor[0].specie))
-    #                     if neighbor[1] <= bondDict[sitePair]:
-    #                         tmpSites += [neighbor[0]]
-    #     singleMol += candidates
-    #     candidates = []
-    #     for site in tmpSites:
-    #         if site not in singleMol:
-    #             candidates += [site]
     return singleMol
 
 def getCentralSingleMol(supercell, bondDict):
