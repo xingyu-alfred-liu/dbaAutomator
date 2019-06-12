@@ -51,27 +51,32 @@ def constructSuperCell(QEinputPath, fineGrid, fineGridpath):
     # pymatgenStruct.to(filename='pymatgenSuperCell.cif')
     return pymatgenStruct
 
-def getSingleMol(supercell, middleSite, bondDict):
+def getSingleMol(supercell, middleSite, bondDict, middleSiteIndex):
     candidates = [middleSite]
+    candidatesIndex = [middleSiteIndex]
     tmpSites = []
-    singleMol = []
+    singleMol = dict()
     while candidates != []:
         for site in candidates:
             bondCutoffMax = 0
             for pair in bondDict.keys():
                 if (bondDict[pair] >= bondCutoffMax) and (str(site.specie) in pair):
                     bondCutoffMax = bondDict[pair]
-            allNeighbors = supercell.get_neighbors(site, bondCutoffMax)
+            allNeighbors = supercell.get_neighbors(site, bondCutoffMax, include_index=True)
             for neighbor in allNeighbors:
                 sitePair = (str(site.specie), str(neighbor[0].specie))
                 if neighbor[1] <= bondDict[sitePair]:
-                    tmpSites += [neighbor[0]]
+                    tmpSites += [neighbor]
         tmpSites = list(set(tmpSites))
-        singleMol += candidates
+        for i, site in enumerate(candidates):
+            singleMol[candidatesIndex[i]] = site
         candidates = []
+        candidatesIndex = []
         for site in tmpSites:
-            if site not in singleMol:
-                candidates += [site]
+            # check if the site index is in the single molecule index
+            if site[2] not in singleMol.keys():
+                candidates += [site[0]]
+                candidatesIndex += [site[2]]
         print('Number of atoms in this molecule:')
         print(len(singleMol))
         tmpSites = []
@@ -81,27 +86,35 @@ def getCentralSingleMol(supercell, bondDict):
     # find site in the middle
     dist = 1
     middle = [0.5, 0.5, 0.5]
-    for site in supercell.sites:
+    for i, site in enumerate(supercell.sites):
         if np.linalg.norm(middle-site.frac_coords) < dist:
             dist = np.linalg.norm(middle-site.frac_coords)
             middleSite = site
+            middleSiteIndex = i
     # print(site.frac_coords)
     # print(site.coords)
     # print(site.specie)
     print('The site closest to the middle is', middleSite)
+    print('The corresponding site index is', middleSiteIndex)
     # pick up all the atom pairs within bond van der waals distance
     # centralSingleMol is the list of sites which belong to the central molecule
-    centralSingleMol = getSingleMol(supercell, middleSite, bondDict)
+    centralSingleMol = getSingleMol(supercell, middleSite, bondDict, middleSiteIndex)
     return centralSingleMol
 
 def outputMolecule(singleMol, dataDir):
     molecule = Molecule([], [])
-    for site in singleMol:
-        molecule.append(str(site.specie), site.coords)
+    moleculeIndex = []
+    for siteIndex in singleMol.keys():
+        moleculeIndex.append(siteIndex)
+        molecule.append(str(singleMol[siteIndex].specie), singleMol[siteIndex].coords)
+    moleculeIndex = np.array(moleculeIndex)
+    moleculeIndex = moleculeIndex.astype(int)
     xyzObj = XYZ(molecule)
     os.chdir(dataDir)
     os.system('mkdir singleMolecule')
-    xyzObj.write_file(dataDir+'/singleMolecule/singleMol.xyz')
+    xyzObj.write_file(dataDir+'/singleMol.xyz')
+    np.savetxt(dataDir+'/singleMolIndex.txt', moleculeIndex, delimiter=',', fmt="%d")
+    print('The single molecule structure and corresponding index in the supercell is saved under \'singleMol\'')
 
 if __name__ == "__main__":
 
@@ -113,4 +126,4 @@ if __name__ == "__main__":
     bondDict = getBondDict(supercell, bondCutoff)
     singleMol = getCentralSingleMol(supercell, bondDict)
     # otuput the single Molecule file
-    outputMolecule(singleMol, dataDir)
+    outputMolecule(singleMol, singleMolPath)

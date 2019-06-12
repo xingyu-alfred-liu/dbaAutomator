@@ -65,24 +65,30 @@ def findHole(supercell, twoNeighbors, chargeSite):
     holePosition = [0, 0, 0]
     for i in range(3):
         holePosition[i] = chargeSite.coords[i] + normalVec[i]*shift
-    print()
-    print('Hole Position')
-    print(holePosition)
-    print('charge Site')
-    print(chargeSite.coords)
+    # print()
+    # print('Hole Position')
+    # print(holePosition)
+    # print('charge Site')
+    # print(chargeSite.coords)
     supercell.append('He', holePosition, coords_are_cartesian=True)
-    print('Fractional position')
-    print(supercell.sites[-1].frac_coords)
+    # print('Fractional position')
+    # print(supercell.sites[-1].frac_coords)
     return supercell.sites[-1].frac_coords
 
 # !!! important !!!
 # this function sets the charge percentage threshold as 1%
 def getHolePositions(chargeMatrix, singleMol, supercell, bondDict, chargeThreshold=0.01):
+    print()
+    print()
+    print("!!!!!!!!!!!!!!!!")
     bondlength = 0
     for key in bondDict:
         if bondDict[key] >= bondlength:
             bondlength = bondDict[key]
     chargeIndex = np.where(chargeMatrix[:, 4] > chargeThreshold)[0]
+    print(chargeIndex)
+    for i in chargeIndex:
+        print(chargeMatrix[i][4]*100)
     holePositions = dict()
     for charindex in chargeIndex:
         chargeSite = singleMol.sites[charindex]
@@ -90,6 +96,9 @@ def getHolePositions(chargeMatrix, singleMol, supercell, bondDict, chargeThresho
         twoNeighbors = []
         # delete the neighbors which are H
         neighborSites[:] = filterfalse(lambda x: str(x[0].specie) == 'H', neighborSites)
+        print('charge site')
+        print(chargeSite)
+        print(neighborSites)
         for neighbor in neighborSites:
             if len(twoNeighbors) < 2:
                 twoNeighbors += [neighbor]
@@ -102,7 +111,8 @@ def getHolePositions(chargeMatrix, singleMol, supercell, bondDict, chargeThresho
                         removeSite = site
                 twoNeighbors.remove(removeSite)
         holePositions[chargeSite] = findHole(supercell, twoNeighbors, chargeSite)
-
+    print('the hole positions might not be correct')
+    print('implement my own algorithm?')
     return None
 
 if __name__ == "__main__":
