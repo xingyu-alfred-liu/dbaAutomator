@@ -78,26 +78,29 @@ def findHole(supercell, twoNeighbors, chargeSite):
 # !!! important !!!
 # this function sets the charge percentage threshold as 1%
 def getHolePositions(chargeMatrix, singleMol, supercell, bondDict, chargeThreshold=0.01):
-    print()
-    print()
-    print("!!!!!!!!!!!!!!!!")
     bondlength = 0
     for key in bondDict:
         if bondDict[key] >= bondlength:
             bondlength = bondDict[key]
     chargeIndex = np.where(chargeMatrix[:, 4] > chargeThreshold)[0]
-    print(chargeIndex)
+    print(chargeIndex+1)
     for i in chargeIndex:
-        print(chargeMatrix[i][4]*100)
+        print(chargeMatrix[i][4]*100, i)
     holePositions = dict()
     for charindex in chargeIndex:
         chargeSite = singleMol.sites[charindex]
         neighborSites = singleMol.get_neighbors(chargeSite, bondlength)
         twoNeighbors = []
         # delete the neighbors which are H
+        print()
+        print()
+        print('!!!!!!!!!!!!!!!!')
+        print('neighbor site')
+        print(neighborSites)
         neighborSites[:] = filterfalse(lambda x: str(x[0].specie) == 'H', neighborSites)
         print('charge site')
         print(chargeSite)
+        print('neighbor site')
         print(neighborSites)
         for neighbor in neighborSites:
             if len(twoNeighbors) < 2:
