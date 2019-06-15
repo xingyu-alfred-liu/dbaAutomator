@@ -14,19 +14,21 @@ from copy import deepcopy
 import math
 import time
 from itertools import filterfalse
+from ase.io import read
+from pymatgen.io.ase import AseAtomsAdaptor
 
 def loadSingleMol(singleMolPath):
     singleMol = Molecule.from_file(singleMolPath+'/singleMol.xyz')
     return singleMol
 
-def getChargeMatrix(singleMol, singleMolPath):
-    if not 'ACF.dat' in os.listdir(singleMolPath):
+def getChargeMatrix(struct, path):
+    if not 'ACF.dat' in os.listdir(path):
         print('!!! Error !!!')
         print('Please make sure the Bader output is put into single Molecule Directory.')
         return 0
     chargeMatrix = []
     # should also check if this charge file is correct
-    with open(singleMolPath+'/ACF.dat', 'r') as infile:
+    with open(path+'/ACF.dat', 'r') as infile:
         for values in infile:
             if len(values.split()) == 7 and values.split()[0].isdigit():
                 chargeMatrix.append(values.split())
@@ -34,7 +36,7 @@ def getChargeMatrix(singleMol, singleMolPath):
                 pass
     chargeMatrix = np.array(chargeMatrix)
     chargeMatrix = chargeMatrix.astype(float)
-    if singleMol.num_sites != len(chargeMatrix):
+    if struct.num_sites != len(chargeMatrix):
         print('!!! Error !!!')
         print('The number of atoms does not match with molecule number')
         return 0
@@ -56,7 +58,7 @@ def calNormalVector(p1, p2, p3):
         vector[i] = vector[i] / sigma
     return vector
 
-def findHole(supercell, twoNeighbors, chargeSite):
+def findHole(unitcell, twoNeighbors, chargeSite):
     point1 = deepcopy(twoNeighbors[0][0].coords)
     point2 = deepcopy(twoNeighbors[1][0].coords)
     point3 = deepcopy(chargeSite.coords)
@@ -65,27 +67,19 @@ def findHole(supercell, twoNeighbors, chargeSite):
     holePosition = [0, 0, 0]
     for i in range(3):
         holePosition[i] = chargeSite.coords[i] + normalVec[i]*shift
-    # print()
-    # print('Hole Position')
-    # print(holePosition)
-    # print('charge Site')
-    # print(chargeSite.coords)
-    supercell.append('He', holePosition, coords_are_cartesian=True)
-    # print('Fractional position')
-    # print(supercell.sites[-1].frac_coords)
-    return supercell.sites[-1].frac_coords
+    unitcell.append('He', holePosition, coords_are_cartesian=True)
+    print('charge site', chargeSite)
+    print('hole position', holePosition)
+    return unitcell.sites[-1].frac_coords
 
 # !!! important !!!
 # this function sets the charge percentage threshold as 1%
-def getHolePositions(chargeMatrix, singleMol, supercell, bondDict, chargeThreshold=0.01):
+def getHolePositions(chargeMatrix, singleMol, unitcell, bondDict, chargeThreshold=0.01):
     bondlength = 0
     for key in bondDict:
         if bondDict[key] >= bondlength:
             bondlength = bondDict[key]
     chargeIndex = np.where(chargeMatrix[:, 4] > chargeThreshold)[0]
-    print(chargeIndex+1)
-    for i in chargeIndex:
-        print(chargeMatrix[i][4]*100, i)
     holePositions = dict()
     for charindex in chargeIndex:
         chargeSite = singleMol.sites[charindex]
@@ -93,15 +87,13 @@ def getHolePositions(chargeMatrix, singleMol, supercell, bondDict, chargeThresho
         twoNeighbors = []
         # delete the neighbors which are H
         print()
-        print()
-        print('!!!!!!!!!!!!!!!!')
-        print('neighbor site')
-        print(neighborSites)
         neighborSites[:] = filterfalse(lambda x: str(x[0].specie) == 'H', neighborSites)
-        print('charge site')
-        print(chargeSite)
-        print('neighbor site')
-        print(neighborSites)
+        # print('charge site')
+        # print(chargeSite)
+        # print('neighbor site')
+        # print(neighborSites)
+        # control the length of the twoNeighbors list smaller or equal than 2
+        # delete every
         for neighbor in neighborSites:
             if len(twoNeighbors) < 2:
                 twoNeighbors += [neighbor]
@@ -113,15 +105,25 @@ def getHolePositions(chargeMatrix, singleMol, supercell, bondDict, chargeThresho
                         tmpBondLength = site[1]
                         removeSite = site
                 twoNeighbors.remove(removeSite)
-        holePositions[chargeSite] = findHole(supercell, twoNeighbors, chargeSite)
-    print('the hole positions might not be correct')
-    print('implement my own algorithm?')
-    return None
+        holePositions[charindex] = findHole(unitcell, twoNeighbors, chargeSite)
+    print()
+    print('hole positions:')
+    for key in holePositions.keys():
+        print(key, ':', holePositions[key])
+    return holePositions
+
+def getUnitCell(QEinputPath):
+    asecell = read(QEinputPath)
+    mgobj = AseAtomsAdaptor()
+    mgcell = mgobj.get_structure(asecell)
+    return mgcell
 
 if __name__ == "__main__":
     singleMol = loadSingleMol(singleMolPath)
     chargeMatrix = getChargeMatrix(singleMol, singleMolPath)
-    supercell = constructSuperCell(QEinputPath, fineGrid, fineGridpath)
+    #supercell = constructSuperCell(QEinputPath, fineGrid, fineGridpath)
+    unitcell = getUnitCell(QEinputPath)
     # find out the fractional coordinates of hole positions
-    bondDict = getBondDict(supercell, bondCutoff)
-    holeSites = getHolePositions(chargeMatrix, singleMol, supercell, bondDict, chargeThreshold)
+    bondDict = getBondDict(unitcell, bondCutoff)
+    #holeSites = getHolePositions(chargeMatrix, singleMol, supercell, bondDict, chargeThreshold)
+    holeSites = getHolePositions(chargeMatrix, singleMol, unitcell, bondDict, chargeThreshold)

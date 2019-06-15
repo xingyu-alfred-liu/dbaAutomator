@@ -91,9 +91,6 @@ def getCentralSingleMol(supercell, bondDict):
             dist = np.linalg.norm(middle-site.frac_coords)
             middleSite = site
             middleSiteIndex = i
-    # print(site.frac_coords)
-    # print(site.coords)
-    # print(site.specie)
     print('The site closest to the middle is', middleSite)
     print('The corresponding site index is', middleSiteIndex)
     # pick up all the atom pairs within bond van der waals distance
@@ -123,6 +120,7 @@ if __name__ == "__main__":
     # read in the structure file and construct the super cell
     supercell = constructSuperCell(QEinputPath, fineGrid, fineGridpath)
     # get the single molecule from the super cell in the middle
+    #unitcell = getUnitCell(QEinputPath)
     bondDict = getBondDict(supercell, bondCutoff)
     singleMol = getCentralSingleMol(supercell, bondDict)
     # otuput the single Molecule file

@@ -53,4 +53,5 @@ dataDir = '/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data'
 baderPath = '/Users/alfredliu/Documents/Research/Software/Bader/macos/bader'
 chargePath = "/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/singleMolecule/eigen_density185.cube"
 singleMolPath = "/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/singleMolecule"
+supercellPath = "/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/supercell"
 chargeThreshold = 0.01
