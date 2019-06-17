@@ -1,5 +1,5 @@
 from ase.io import read, write
-from ase.build import make_supercell
+# from ase.build import make_supercell
 from filepath import *
 import linecache
 from copy import deepcopy
@@ -67,7 +67,13 @@ def getSingleMol(supercell, middleSite, bondDict, middleSiteIndex):
                 sitePair = (str(site.specie), str(neighbor[0].specie))
                 if neighbor[1] <= bondDict[sitePair]:
                     tmpSites += [neighbor]
-        tmpSites = list(set(tmpSites))
+        #tmpSites = list(set(tmpSites))
+        # ugly solution
+        tmpSiteslist = list()
+        for tmpsite in tmpSites:
+            if tmpsite not in tmpSiteslist:
+                tmpSiteslist += [tmpsite]
+        tmpSites = deepcopy(tmpSiteslist)
         for i, site in enumerate(candidates):
             singleMol[candidatesIndex[i]] = site
         candidates = []

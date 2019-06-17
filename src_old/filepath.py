@@ -45,13 +45,13 @@ please type in:
 """
 
 # for single molecule processing
-QEinputPath = '/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/crystal/in'
-fineGridpath = '/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/crystal/kgrid.in'
+QEinputPath = '/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data_old/crystal/in'
+fineGridpath = '/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data_old/crystal/kgrid.in'
 fineGrid = []
-dataDir = '/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data'
+dataDir = '/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data_old'
 # for bader analysis calculation
 baderPath = '/Users/alfredliu/Documents/Research/Software/Bader/macos/bader'
-chargePath = "/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/singleMolecule/eigen_density185.cube"
-singleMolPath = "/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/singleMolecule"
-supercellPath = "/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/supercell"
+chargePath = "/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data_old/singleMolecule/eigen_density185.cube"
+singleMolPath = "/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data_old/singleMolecule"
+supercellPath = "/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data_old/supercell"
 chargeThreshold = 0.01
