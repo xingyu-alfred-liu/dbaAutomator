@@ -17,3 +17,11 @@ Some external resources:
 
 DO NOT FORGET:  
     - cube file has Bohr and Angstrom units, FHI-aims use Bohr (at least for my output file), remember to convert it to Angstrom
+
+NEXT:
+    - io.py
+    - utility.py
+    - getSingleMol.py
+    - getHolePositions.py
+    - checkConvergence.py
+    - getDBA.py
