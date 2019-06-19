@@ -41,7 +41,7 @@ please make sure the vars below are correct:
 
 # for single molecule processing
 fineGrid = []
-dataDir = '../data'
+dataDir = '/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data'
 # for bader analysis calculation
 baderPath = '/Users/alfredliu/Documents/Research/Software/Bader/macos/bader'
 chargePath = "/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/singleMolecule/eigen_density185.cube"

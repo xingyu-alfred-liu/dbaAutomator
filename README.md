@@ -27,6 +27,16 @@ excition wfn calculations (.cube files) performed by BerkeleyGW
 (https://berkeleygw.org/), and most of the DFT codes cope with
 Berkeley, such as Quantum ESPRESSO. 
 
+How it works:
+    This program works in several steps:
+    1. get middle single molecule of the constructed supercell, we will select
+    hole positions according to this middle single molecule
+    2. after you get the single molecule structure, please calculate the HOMO
+    and put the .cube file inside /data/singlemolecule
+    3. according to this singlemolecule HOMO, we will decide the Cartesian coordinates of holes and output the exciton wavefunction input file for BerkeleyGW
+    4. after you run all the exciton wavefunction calculations, we will collect
+    all charge files and run dba over and output the final charge transfer character
+
 Functionality:  
     - find hole positions with HOMO cube file  
     - generate input file, which is define excition wfn calculation input file  
@@ -34,16 +44,4 @@ Functionality:
 
 Some external resources:  
     - cube file explanation: http://paulbourke.net/dataformats/cube/  
-    - Bader implementation we used: http://theory.cm.utexas.edu/henkelman/code/bader/  
-
-DO NOT FORGET:  
-    - cube file has Bohr and Angstrom units, FHI-aims use Bohr (at least for my output file), remember to convert it to Angstrom
-
-NEXT:
-    - io.py
-    - utility.py
-    - getSingleMol.py
-    - getHolePositions.py
-    - checkConvergence.py
-    - getDBA.py
-    or the above four as a class function
+    - Bader implementation we used: http://theory.cm.utexas.edu/henkelman/code/bader
