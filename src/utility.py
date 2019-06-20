@@ -1,5 +1,5 @@
 """ 
-    utility.py provide the io functions, including:
+    utility.py provide all functions:
 
     - loadUnitCell(path)
     path is the dataPath, dataPath needs to be defined
@@ -17,6 +17,7 @@ from pymatgen import Molecule
 from pymatgen.io.xyz import XYZ
 from itertools import filterfalse
 import math
+import json
 
 def outputMolecule(singleMol, dataDir):
     molecule = Molecule([], [])
@@ -146,7 +147,7 @@ def getSuperCell(path, unitcell, finegrid):
     return unitcell
 
 def loadSingleMol(path):
-    singleMol = Molecule.from_file(path+'singlemolecule/singleMol.xyz')
+    singleMol = Molecule.from_file(path+'/singlemolecule/singleMol.xyz')
     return singleMol
 
 def getChargeMatrix(struct, path):
@@ -188,14 +189,8 @@ def getHolePositions(chargeMatrix, singleMol, unitcell, bondDict, chargeThreshol
         neighborSites = singleMol.get_neighbors(chargeSite, bondlength)
         twoNeighbors = []
         # delete the neighbors which are H
-        print()
         neighborSites[:] = filterfalse(lambda x: str(x[0].specie) == 'H', neighborSites)
-        # print('charge site')
-        # print(chargeSite)
-        # print('neighbor site')
-        # print(neighborSites)
         # control the length of the twoNeighbors list smaller or equal than 2
-        # delete every
         for neighbor in neighborSites:
             if len(twoNeighbors) < 2:
                 twoNeighbors += [neighbor]
@@ -240,3 +235,15 @@ def calNormalVector(p1, p2, p3):
     for i in range(3):
         vector[i] = vector[i] / sigma
     return vector
+
+def outputHolePositions(holeSites, path):
+    supercellPath = path+'/supercell'
+    # json does not allow numpy,int64
+    # convert values into list of float
+    tmpdict = dict()
+    for key in holeSites.keys():
+        tmpdict[int(key)] = list(holeSites[key])
+    outputdict = {'HolePositions': tmpdict}
+    with open(supercellPath+'/holePositions.txt', 'w') as file:
+        file.write(json.dumps(outputdict))
+    

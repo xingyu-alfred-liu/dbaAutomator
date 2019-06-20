@@ -45,3 +45,9 @@ Functionality:
 Some external resources:  
     - cube file explanation: http://paulbourke.net/dataformats/cube/  
     - Bader implementation we used: http://theory.cm.utexas.edu/henkelman/code/bader
+
+Reminder:
+    - DO NOT rerun single molecule selection after you get the HOMO,
+    because the order of this single molecule might change
+    - Do rerun single molecule selection if you decide to change the
+    supercell size
