@@ -26,7 +26,7 @@ class singleMolSelector(object):
     def outputMolecule(self):
         outputMolecule(self.singleMol, self.path)
 
-def step1(dataDir, fineGrid, bondCutoff):
+if __name__ == "__main__":
     # print('Step 1: Find the single molecule cloest to the middle in super cell')
     # unitcell = loadUnitCell(dataDir)
     # supercell = getSuperCell(dataDir, unitcell, fineGrid)
@@ -39,6 +39,3 @@ def step1(dataDir, fineGrid, bondCutoff):
     smSelector.getbondDict(bondCutoff)
     smSelector.getCentralSingleMol()
     smSelector.outputMolecule()
-
-if __name__ == "__main__":
-    step1(dataDir, fineGrid, bondCutoff)

@@ -240,10 +240,35 @@ def outputHolePositions(holeSites, path):
     supercellPath = path+'/supercell'
     # json does not allow numpy,int64
     # convert values into list of float
+    filename = 'holePositions.json'
+    if filename in os.listdir(supercellPath):
+        print('There is one json file from previous calculation')
+        print('The old file will be rewritten')
+        decision = 'A+'
+        while decision != 'Y' and decision != 'N':
+            decision = input('Do you want to proceed? Y for \'yes\' and N for \'no\.')
+            if decision == 'Y':
+                pass
+            elif decision == 'N':
+                return 0
+            else:
+                print('Please type in either Y or N!!!')
     tmpdict = dict()
     for key in holeSites.keys():
         tmpdict[int(key)] = list(holeSites[key])
-    outputdict = {'HolePositions': tmpdict}
-    with open(supercellPath+'/holePositions.txt', 'w') as file:
-        file.write(json.dumps(outputdict))
-    
+    with open(supercellPath+'/holePositions.json', 'w') as file:
+        file.write(json.dumps(tmpdict, indent=4))
+
+# this function will create a list of directories
+# name them with the charge site index of the single molecule
+# and place the plot_xct input files there
+def createPlotxctInput(path, holeSites, plotxctinput):
+    dbapath = os.path.join(path, 'dba')
+    for key in holeSites.keys():
+        plotxctpath = os.path.join(dbapath, str(key))
+        os.system('mkdir '+plotxctpath)
+        with open(os.path.join(plotxctpath, 'plotxct.inp'), 'w') as outfile:
+            outfile.write(plotxctinput)
+            outfile.write('hole_position   ')
+            for value in holeSites[key]:
+                outfile.write(str(value)+'   ')

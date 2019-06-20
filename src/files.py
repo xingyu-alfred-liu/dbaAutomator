@@ -40,7 +40,7 @@ please make sure the vars below are correct:
 """
 
 # for single molecule processing
-fineGrid = []
+fineGrid = [8, 8, 2]
 dataDir = '/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data'
 # for bader analysis calculation
 baderPath = '/Users/alfredliu/Documents/Research/Software/Bader/macos/bader'
@@ -48,3 +48,9 @@ chargePath = "/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/singl
 singleMolPath = "/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/singleMolecule"
 supercellPath = "/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/supercell"
 chargeThreshold = 0.01
+plotxctinput = \
+"# Index of satte to be plotted,as it appears in eigenvectors\n\
+plot_state 1\n\
+# Size of supercell\n\
+supercell_size 8 8 2\n\
+# coordinates of hole, in units of lattice vectors\n"

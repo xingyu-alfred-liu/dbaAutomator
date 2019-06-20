@@ -18,6 +18,8 @@ class holeLocator(object):
             self.singleMol, self.unitcell, self.bondDict, chargeThreshold)
     def outputHolePositions(self):
         outputHolePositions(self.holeSites, self.path)
+    def createPlotxctInput(self, plotxctinput):
+        createPlotxctInput(self.path, self.holeSites, plotxctinput)
 
 if __name__ == "__main__":
     # singleMol = loadSingleMol(dataDir)
@@ -32,3 +34,4 @@ if __name__ == "__main__":
     holelocator.getBondDict(bondCutoff)
     holelocator.getHolePositions(chargeThreshold)
     holelocator.outputHolePositions()
+    holelocator.createPlotxctInput(plotxctinput)
