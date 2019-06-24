@@ -8,7 +8,7 @@ class holeLocator(object):
     def loadSingleMol(self):
         self.singleMol = loadSingleMol(self.path)
     def getChargeMatrix(self):
-        self.chargeMatrix = getChargeMatrix(self.singleMol, self.path)
+        self.chargeMatrix = getChargeMatrix(self.singleMol, os.path.join(self.path, 'singlemolecule'))
     def loadUnitCell(self):
         self.unitcell = loadUnitCell(self.path)
     def getBondDict(self, bondCutoff):

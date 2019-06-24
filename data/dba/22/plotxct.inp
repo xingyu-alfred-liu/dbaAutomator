@@ -1,6 +1,0 @@
-# Index of satte to be plotted,as it appears in eigenvectors
-plot_state 1
-# Size of supercell
-supercell_size 8 8 2
-# coordinates of hole, in units of lattice vectors
-hole_position   4.125904658019388   4.580261566111933   1.1709494483621887   

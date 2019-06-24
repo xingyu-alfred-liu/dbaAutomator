@@ -133,6 +133,9 @@ def loadUnitCell(path):
 def getSuperCell(path, unitcell, finegrid):
     unitcellpath = path+'/unitcell'
     if finegrid != []:
+        print()
+        print('Reminder: Please make sure you type the correct fine grid')
+        print()
         unitcell.make_supercell(finegrid)
     else:
         print('No definitions found in fineGrid, now trying kgrid.in')
@@ -151,14 +154,13 @@ def loadSingleMol(path):
     return singleMol
 
 def getChargeMatrix(struct, path):
-    singlemolpath = path+'/singlemolecule'
-    if not 'ACF.dat' in os.listdir(singlemolpath):
+    if not 'ACF.dat' in os.listdir(path):
         print('!!! Error !!!')
         print('Please make sure the Bader output is put into single Molecule Directory.')
         return 0
     chargeMatrix = []
     # should also check if this charge file is correct
-    with open(singlemolpath+'/ACF.dat', 'r') as infile:
+    with open(path+'/ACF.dat', 'r') as infile:
         for values in infile:
             if len(values.split()) == 7 and values.split()[0].isdigit():
                 chargeMatrix.append(values.split())
@@ -272,3 +274,46 @@ def createPlotxctInput(path, holeSites, plotxctinput):
             outfile.write('hole_position   ')
             for value in holeSites[key]:
                 outfile.write(str(value)+'   ')
+
+def loadCubeCell(path):
+    print('Loading supercell now, please wait...')
+    namelist = os.listdir(path)
+    asestruct = None
+    for name in namelist:
+        if name.endswith('cube'):
+            asestruct = read(os.path.join(path, name))
+            break
+    if asestruct == None:
+        print('Error!!!')
+        print('There is no cube file under /data/supercell.')
+        print('Please make sure the exciton wavefunction calculation output\
+            is put under the folder \'supercell\'.')
+        return 0
+    else:
+        pmgobj = AseAtomsAdaptor()
+        pmgstruct = pmgobj.get_structure(asestruct)
+        return pmgstruct
+
+def getMoleculeIndex(singleMol, cubecell, threshold = 0.01):
+    molIndex = dict()
+    for i, molsite in enumerate(singleMol.sites):
+        for j, cellsite in enumerate(cubecell.sites):
+            if (np.linalg.norm(molsite.coords-cellsite.coords)<threshold) and (str(cellsite.specie)==str(molsite.specie)):
+                molIndex[i] = j
+            continue
+    print('The length of the hole positioned molecule:', len(molIndex.keys()))
+    if len(molIndex.keys()) != singleMol.num_sites:
+        print('Error!!!')
+        print('The number of atoms within a single molecule found in the cube file\
+            is not the same as the one stored under /data/singlemolecule')
+        print('Please make sure there is no change of the output single \
+            molecule from step 1')
+        return 0
+    else:
+        return molIndex
+
+def getMolShare(chargeMatrix, molIndex):
+    molshare = 0
+    for key in molIndex.keys():
+        molshare += chargeMatrix[molIndex[key]][4]
+    return molshare

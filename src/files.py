@@ -40,14 +40,11 @@ please make sure the vars below are correct:
 """
 
 # for single molecule processing
-fineGrid = [8, 8, 2]
+fineGrid = [8, 4, 6]
 dataDir = '/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data'
-# for bader analysis calculation
-baderPath = '/Users/alfredliu/Documents/Research/Software/Bader/macos/bader'
-chargePath = "/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/singleMolecule/eigen_density185.cube"
-singleMolPath = "/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/singleMolecule"
-supercellPath = "/Users/alfredliu/Desktop/papersWorkingOn/dba_automation/data/supercell"
 chargeThreshold = 0.01
+
+# the plot_xct calculation input settings
 plotxctinput = \
 "# Index of satte to be plotted,as it appears in eigenvectors\n\
 plot_state 1\n\
