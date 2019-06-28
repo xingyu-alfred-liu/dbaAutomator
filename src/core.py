@@ -1,6 +1,6 @@
 import os
-from utility import *
-from bondLengthRef import *
+from functions import *
+from ref import *
 
 class automator(object):
     def __init__(self, path, fineGrid, chargeThreshold=0.01):
