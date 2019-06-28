@@ -1,4 +1,3 @@
-from files import *
 from utility import *
 from bondLengthRef import bondCutoff
 

@@ -102,3 +102,10 @@ bondCutoff = {('H', 'H'): 1.2,
               ('I', 'Si'): 2.04, 
               ('Si', 'Si'): 2.4, 
               ('Si', 'O'): 1.69}
+
+plotxctinput = \
+"# Index of satte to be plotted,as it appears in eigenvectors\n\
+plot_state 1\n\
+# Size of supercell\n\
+supercell_size 8 8 2\n\
+# coordinates of hole, in units of lattice vectors\n"

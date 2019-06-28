@@ -21,16 +21,22 @@ import json
 
 def outputMolecule(singleMol, dataDir):
     molecule = Molecule([], [])
-    #moleculeIndex = []
+    singlemolpath = os.path.join(dataDir, 'singlemolecule')
     for siteIndex in singleMol.keys():
-        #moleculeIndex.append(siteIndex)
         molecule.append(str(singleMol[siteIndex].specie), singleMol[siteIndex].coords)
-    #moleculeIndex = np.array(moleculeIndex)
-    #moleculeIndex = moleculeIndex.astype(int)
     xyzObj = XYZ(molecule)
-    xyzObj.write_file(dataDir+'/singlemolecule/singleMol.xyz')
-    #np.savetxt(dataDir+'/singleMolIndex.txt', moleculeIndex, delimiter=',', fmt="%d")
-    print('The single molecule structure and corresponding index in the supercell is saved under \'/data/singlemolecule\'')
+    if "singleMol.xyz" in os.listdir(singlemolpath):
+        decision = None
+        print('You have one \'singleMol.xyz\' file inside the single molecule path.')
+        print('This previous file will be overwritten.')
+        while decision != 'Y' and decision != 'N':
+            decision = input('Do you want to proceed? Y for yes, N for no.')
+    if decision == 'Y':
+        xyzObj.write_file(singlemolpath+'/singleMol.xyz')
+        print('The single molecule structure and corresponding index in the supercell is saved under \'/data/singlemolecule\'')
+        print('It\'s named as \'singleMol.xyz\'.')
+    else:
+        print('The previous file is not changed. ')
 
 def getSingleMol(supercell, middleSite, bondDict, middleSiteIndex):
     candidates = [middleSite]
@@ -119,7 +125,10 @@ def loadUnitCell(path):
         filelist = os.listdir(unitcellpath)
         if 'kgrid.in' in filelist:
             filelist.remove('kgrid.in')
-        unitcell = read(unitcellpath+'/'+filelist[0])
+        for filename in filelist:
+            if filename.startswith('.'):
+                filelist.remove(filename)
+        unitcell = read(os.path.join(unitcellpath, filelist[0]))
         if unitcell == 0:
             print('There is no readable input file in /data/unitcell')
             print('Please check the instructions or change your unit cell format')
@@ -205,10 +214,6 @@ def getHolePositions(chargeMatrix, singleMol, unitcell, bondDict, chargeThreshol
                         removeSite = site
                 twoNeighbors.remove(removeSite)
         holePositions[charindex] = findHole(unitcell, twoNeighbors, chargeSite)
-    print()
-    print('hole positions:')
-    for key in holePositions.keys():
-        print(key, ':', holePositions[key])
     return holePositions
 
 def findHole(unitcell, twoNeighbors, chargeSite):
@@ -221,8 +226,6 @@ def findHole(unitcell, twoNeighbors, chargeSite):
     for i in range(3):
         holePosition[i] = chargeSite.coords[i] + normalVec[i]*shift
     unitcell.append('He', holePosition, coords_are_cartesian=True)
-    print('charge site', chargeSite)
-    print('hole position', holePosition)
     return unitcell.sites[-1].frac_coords
 
 def calNormalVector(p1, p2, p3):
@@ -239,7 +242,7 @@ def calNormalVector(p1, p2, p3):
     return vector
 
 def outputHolePositions(holeSites, path):
-    supercellPath = path+'/supercell'
+    supercellPath = os.path.join(path, '/supercell')
     # json does not allow numpy,int64
     # convert values into list of float
     filename = 'holePositions.json'
@@ -317,3 +320,13 @@ def getMolShare(chargeMatrix, molIndex):
     for key in molIndex.keys():
         molshare += chargeMatrix[molIndex[key]][4]
     return molshare
+
+def loadHolePositions(path):
+    supercellpath = os.path.join(path, "supercell")
+    try:
+        with open(os.path.join(supercellpath, "holePositions.json"), 'r') as jsonin:
+            data = json.load(jsonin)
+            return data
+    except FileNotFoundError as fileerr:
+        print(fileerr)
+    
