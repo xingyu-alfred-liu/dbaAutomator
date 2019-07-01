@@ -47,15 +47,15 @@ class automator(object):
             createPlotxctInput(self.path, self.holeSites, self.plotxctinput)
 
     # the path has to be the path to a folder where one cube file and corresponding 
-    def checkconvergence(self, path):
-        print("Checking convergence now...")
-        filelist = os.listdir(path)
-        for file in filelist:
-            if file.endswith('.cube'):
-                cubefilename = file
-                break
-        cubeSupercell_check = loadCubeCell(os.path.join(path, cubefilename))
-        chargeMatrix_check = getChargeMatrix(cubeSupercell_check, os.path.join(path, path))
+    # def checkconvergence(self, path):
+    #     print("Checking convergence now...")
+    #     filelist = os.listdir(path)
+    #     for file in filelist:
+    #         if file.endswith('.cube'):
+    #             cubefilename = file
+    #             break
+    #     cubeSupercell_check = loadCubeCell(os.path.join(path, cubefilename))
+    #     chargeMatrix_check = getChargeMatrix(cubeSupercell_check, os.path.join(path, path))
 
     def caldba(self):
         print('Now calculate charge transfer character...')
@@ -91,3 +91,14 @@ class automator(object):
         for hole in holeindexlist:
             chargetransfer += chargeshare[str(hole)] * self.smcharge[hole]
         print('The total charge transfer character is:', "{:0.2f}".format(chargetransfer*100), "%")
+
+class checker(object):
+    # the path has to be the absolute path to where dba runs
+    def __init__(self, path):
+        self.path = path
+        checkList = []
+        self.checklist = getXctPath(self.path, checkList)
+    def checkconv(self):
+        for name in self.checklist:
+            print('Now check folder', name)
+            

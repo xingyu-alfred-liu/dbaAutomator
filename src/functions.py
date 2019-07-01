@@ -330,3 +330,16 @@ def loadHolePositions(path):
     except FileNotFoundError as fileerr:
         print(fileerr)
     
+def getXctPath(path, checklist):
+    filelist = os.listdir(path)
+    if "plotxct.inp" not in filelist:
+        for name in filelist:
+            if os.path.isdir(name):
+                checklist = getXctPath(os.path.join(path, name), checklist)
+    else:
+        if not any(name.endswith("cube") for name in filelist):
+            print('In folder', path, 'we found plotxct.inp but didn\' find .cube file.')
+            print('Please check if you put all necessary output there.')
+        else:
+            checklist += [path]
+    return checklist
