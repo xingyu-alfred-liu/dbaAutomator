@@ -31,12 +31,18 @@ def outputMolecule(singleMol, dataDir):
         print('This previous file will be overwritten.')
         while decision != 'Y' and decision != 'N':
             decision = input('Do you want to proceed? Y for yes, N for no.')
-    if decision == 'Y':
-        xyzObj.write_file(singlemolpath+'/singleMol.xyz')
+            if decision == 'Y':
+                xyzObj.write_file(os.path.join(singlemolpath, '/singleMol.xyz'))
+                print('The single molecule structure and corresponding index in the supercell is saved under \'/data/singlemolecule\'')
+                print('It\'s named as \'singleMol.xyz\'.')
+            elif decision == 'N':
+                print('The previous file is not changed. ')
+            else:
+                print('Not eligible response!!!\n')
+    else:
+        xyzObj.write_file(os.path.join(singlemolpath, '/singleMol.xyz'))
         print('The single molecule structure and corresponding index in the supercell is saved under \'/data/singlemolecule\'')
         print('It\'s named as \'singleMol.xyz\'.')
-    else:
-        print('The previous file is not changed. ')
 
 def getSingleMol(supercell, middleSite, bondDict, middleSiteIndex):
     candidates = [middleSite]
@@ -267,16 +273,22 @@ def outputHolePositions(holeSites, path):
 # this function will create a list of directories
 # name them with the charge site index of the single molecule
 # and place the plot_xct input files there
-def createPlotxctInput(path, holeSites, plotxctinput):
+def createPlotxctInput(path, holeSites, fineGrid):
     dbapath = os.path.join(path, 'dba')
     for key in holeSites.keys():
         plotxctpath = os.path.join(dbapath, str(key))
         os.system('mkdir '+plotxctpath)
         with open(os.path.join(plotxctpath, 'plotxct.inp'), 'w') as outfile:
-            outfile.write(plotxctinput)
+            outfile.write("Index of state to be plotted, as it appears in eigenvectors\n\
+                           plot_state 1\n")
+            outfile.write("# Size of supercell\n")
+            outfile.write("supercell_size  ")
+            for grid in fineGrid:
+                outfile.write(str(grid)+'  ')
+            outfile.write("# coordinates of hole, in units of lattice vectors\n")
             outfile.write('hole_position   ')
             for value in holeSites[key]:
-                outfile.write(str(value)+'   ')
+                outfile.write(str(value)+'  ')
 
 def loadCubeCell(path):
     print('Loading supercell now, please wait...')
@@ -334,12 +346,27 @@ def getXctPath(path, checklist):
     filelist = os.listdir(path)
     if "plotxct.inp" not in filelist:
         for name in filelist:
-            if os.path.isdir(name):
+            if os.path.isdir(os.path.join(path, name)):
                 checklist = getXctPath(os.path.join(path, name), checklist)
     else:
         if not any(name.endswith("cube") for name in filelist):
-            print('In folder', path, 'we found plotxct.inp but didn\' find .cube file.')
+            print()
+            print("Warning!!!")
+            print('In folder', path, 'we found plotxct.inp but no .cube file.')
             print('Please check if you put all necessary output there.')
         else:
             checklist += [path]
     return checklist
+
+def getAllMols(supercell, bondDict):
+    # molList is the list of pymatgen Molecule object
+    # tmpMol is pyatgen Molecule object
+    molList = []
+    while len(supercell.sites) != 0:
+        tmpMol = getCentralSingleMol(supercell, bondDict)
+        molList += [tmpMol]
+        """
+        find out how to delete sites from a supercell!!!
+        """
+        supercell.deletesite(tmpMol)
+    return molList

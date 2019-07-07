@@ -7,7 +7,6 @@ class automator(object):
         self.path = path
         self.fineGrid = fineGrid
         self.bondCutoff = bondCutoff
-        self.plotxctinput = plotxctinput
         self.chargeThreshold = chargeThreshold
         print('Now loading the unit cell information...')
         self.unitcell = loadUnitCell(self.path)
@@ -44,7 +43,7 @@ class automator(object):
             outputHolePositions(self.holeSites, self.path)
         if writeinput:
             print('The input files for plotxct calculations are written under:', os.path.join(self.path, "dba"))
-            createPlotxctInput(self.path, self.holeSites, self.plotxctinput)
+            createPlotxctInput(self.path, self.holeSites, self.fineGrid)
 
     # the path has to be the path to a folder where one cube file and corresponding 
     # def checkconvergence(self, path):
@@ -98,7 +97,18 @@ class checker(object):
         self.path = path
         checkList = []
         self.checklist = getXctPath(self.path, checkList)
+        if len(self.checklist) == 0:
+            raise Exception('No suitable files found in folder:', self.path)
+        # choose a supercell cell and get the inter molecular distance
+        # first get all complete single molecules
+        self.supercell = loadCubeCell(self.checklist[0])
+        self.bondDict = getBondDict(self.supercell, bondCutoff)
+        self.allMols = getAllMols(self.supercell, self.bondDict)
+        self.convrange = getInterMolLen(self.allMols)
     def checkconv(self):
         for name in self.checklist:
+            os.chdir(name)
             print('Now check folder', name)
-            
+            cubeSuperCell = loadCubeCell(name)
+            chargematrix = getChargeMatrix(cubeSuperCell, name)
+            mola, molb, molc = getAtomIndex(cubeSuperCell, convlen)
