@@ -32,7 +32,7 @@ def outputMolecule(singleMol, dataDir):
         while decision != 'Y' and decision != 'N':
             decision = input('Do you want to proceed? Y for yes, N for no.')
             if decision == 'Y':
-                xyzObj.write_file(os.path.join(singlemolpath, '/singleMol.xyz'))
+                xyzObj.write_file(os.path.join(singlemolpath, 'singleMol.xyz'))
                 print('The single molecule structure and corresponding index in the supercell is saved under \'/data/singlemolecule\'')
                 print('It\'s named as \'singleMol.xyz\'.')
             elif decision == 'N':
@@ -40,7 +40,7 @@ def outputMolecule(singleMol, dataDir):
             else:
                 print('Not eligible response!!!\n')
     else:
-        xyzObj.write_file(os.path.join(singlemolpath, '/singleMol.xyz'))
+        xyzObj.write_file(os.path.join(singlemolpath, 'singleMol.xyz'))
         print('The single molecule structure and corresponding index in the supercell is saved under \'/data/singlemolecule\'')
         print('It\'s named as \'singleMol.xyz\'.')
 
