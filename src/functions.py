@@ -7,42 +7,14 @@
     
 """
 
-from ase.io import read, write
 import os
-from pymatgen.io.ase import AseAtomsAdaptor
-import linecache
+import sys
 import numpy as np
 from copy import deepcopy
 from pymatgen import Molecule
-from pymatgen.io.xyz import XYZ
+from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from itertools import filterfalse
 import math
-import json
-
-def outputMolecule(singleMol, dataDir):
-    molecule = Molecule([], [])
-    singlemolpath = os.path.join(dataDir, 'singlemolecule')
-    for siteIndex in singleMol.keys():
-        molecule.append(str(singleMol[siteIndex].specie), singleMol[siteIndex].coords)
-    xyzObj = XYZ(molecule)
-    if "singleMol.xyz" in os.listdir(singlemolpath):
-        decision = None
-        print('You have one \'singleMol.xyz\' file inside the single molecule path.')
-        print('This previous file will be overwritten.')
-        while decision != 'Y' and decision != 'N':
-            decision = input('Do you want to proceed? Y for yes, N for no.')
-            if decision == 'Y':
-                xyzObj.write_file(os.path.join(singlemolpath, 'singleMol.xyz'))
-                print('The single molecule structure and corresponding index in the supercell is saved under \'/data/singlemolecule\'')
-                print('It\'s named as \'singleMol.xyz\'.')
-            elif decision == 'N':
-                print('The previous file is not changed. ')
-            else:
-                print('Not eligible response!!!\n')
-    else:
-        xyzObj.write_file(os.path.join(singlemolpath, 'singleMol.xyz'))
-        print('The single molecule structure and corresponding index in the supercell is saved under \'/data/singlemolecule\'')
-        print('It\'s named as \'singleMol.xyz\'.')
 
 def getSingleMol(supercell, middleSite, bondDict, middleSiteIndex):
     candidates = [middleSite]
@@ -113,84 +85,15 @@ def getBondDict(supercell, bondCutoff):
     bondDict.update(duplicate)
     return bondDict
 
-def getFineGrid(path):
-    filein = linecache.getlines(path)
-    fineGrid = filein[0].split()
-    for i in range(len(fineGrid)):
-        fineGrid[i] = int(fineGrid[i])
-    return fineGrid
-
-def loadUnitCell(path):
-    unitcellpath = path+'/unitcell'
-    fileNum = len(os.listdir(unitcellpath))
-    if fileNum == 0:
-        print('Error!!!')
-        print('Please include unit cell information under /data/unitcell')
-        return 0
-    else:
-        filelist = os.listdir(unitcellpath)
-        if 'kgrid.in' in filelist:
-            filelist.remove('kgrid.in')
-        for filename in filelist:
-            if filename.startswith('.'):
-                filelist.remove(filename)
-        unitcell = read(os.path.join(unitcellpath, filelist[0]))
-        if unitcell == 0:
-            print('There is no readable input file in /data/unitcell')
-            print('Please check the instructions or change your unit cell format')
-            return 0
-        else:
-            unitcell.set_pbc((True, True, True))
-            pmgobj = AseAtomsAdaptor()
-            pmgstruct = pmgobj.get_structure(unitcell)
-    return pmgstruct
-
-def getSuperCell(path, unitcell, finegrid):
-    unitcellpath = path+'/unitcell'
+def getSuperCell(unitcell, finegrid):
     if finegrid != []:
         print()
         print('Reminder: Please make sure you type the correct fine grid')
         print()
         unitcell.make_supercell(finegrid)
     else:
-        print('No definitions found in fineGrid, now trying kgrid.in')
-        if 'kgrid.in' in os.listdir(unitcellpath):
-            finegrid = getFineGrid(unitcellpath+'/kgrid.in')
-            print('Fine grid found in kgrid.in is:', finegrid)
-        else:
-            print('Error!!!')
-            print('There is no definition of fineGrid and no \'kgrid.in\' found in unitcell folder, please check your settings.')
-            return 0
-        unitcell.make_supercell(finegrid)
+        sys.exit('No definitions found in finegrid, please make sure you input it when define automator.\n')
     return unitcell
-
-def loadSingleMol(path):
-    singleMol = Molecule.from_file(path+'/singlemolecule/singleMol.xyz')
-    return singleMol
-
-def getChargeMatrix(struct, path):
-    if not 'ACF.dat' in os.listdir(path):
-        print('!!! Error !!!')
-        print('Please make sure the Bader output is put into single Molecule Directory.')
-        return 0
-    chargeMatrix = []
-    # should also check if this charge file is correct
-    with open(path+'/ACF.dat', 'r') as infile:
-        for values in infile:
-            if len(values.split()) == 7 and values.split()[0].isdigit():
-                chargeMatrix.append(values.split())
-            else:
-                pass
-    chargeMatrix = np.array(chargeMatrix)
-    chargeMatrix = chargeMatrix.astype(float)
-    if struct.num_sites != len(chargeMatrix):
-        print('!!! Error !!!')
-        print('The number of atoms does not match with molecule number')
-        return 0
-    chargeSum = np.sum(chargeMatrix, axis=0)
-    chargeMatrix[:, 4] /= chargeSum[4]
-    # returned chargeMatrix provides the charge percentage and atom index
-    return chargeMatrix
 
 # !!! important !!!
 # this function sets the charge percentage threshold as 1%
@@ -247,29 +150,6 @@ def calNormalVector(p1, p2, p3):
         vector[i] = vector[i] / sigma
     return vector
 
-def outputHolePositions(holeSites, path):
-    supercellPath = os.path.join(path, '/supercell')
-    # json does not allow numpy,int64
-    # convert values into list of float
-    filename = 'holePositions.json'
-    if filename in os.listdir(supercellPath):
-        print('There is one json file from previous calculation')
-        print('The old file will be rewritten')
-        decision = 'A+'
-        while decision != 'Y' and decision != 'N':
-            decision = input('Do you want to proceed? Y for \'yes\' and N for \'no\.')
-            if decision == 'Y':
-                pass
-            elif decision == 'N':
-                return 0
-            else:
-                print('Please type in either Y or N!!!')
-    tmpdict = dict()
-    for key in holeSites.keys():
-        tmpdict[int(key)] = list(holeSites[key])
-    with open(supercellPath+'/holePositions.json', 'w') as file:
-        file.write(json.dumps(tmpdict, indent=4))
-
 # this function will create a list of directories
 # name them with the charge site index of the single molecule
 # and place the plot_xct input files there
@@ -289,25 +169,6 @@ def createPlotxctInput(path, holeSites, fineGrid):
             outfile.write('hole_position   ')
             for value in holeSites[key]:
                 outfile.write(str(value)+'  ')
-
-def loadCubeCell(path):
-    print('Loading supercell now, please wait...')
-    namelist = os.listdir(path)
-    asestruct = None
-    for name in namelist:
-        if name.endswith('cube'):
-            asestruct = read(os.path.join(path, name))
-            break
-    if asestruct == None:
-        print('Error!!!')
-        print('There is no cube file under /data/supercell.')
-        print('Please make sure the exciton wavefunction calculation output\
-            is put under the folder \'supercell\'.')
-        return 0
-    else:
-        pmgobj = AseAtomsAdaptor()
-        pmgstruct = pmgobj.get_structure(asestruct)
-        return pmgstruct
 
 def getMoleculeIndex(singleMol, cubecell, threshold = 0.01):
     molIndex = dict()
@@ -332,19 +193,10 @@ def getMolShare(chargeMatrix, molIndex):
     for key in molIndex.keys():
         molshare += chargeMatrix[molIndex[key]][4]
     return molshare
-
-def loadHolePositions(path):
-    supercellpath = os.path.join(path, "supercell")
-    try:
-        with open(os.path.join(supercellpath, "holePositions.json"), 'r') as jsonin:
-            data = json.load(jsonin)
-            return data
-    except FileNotFoundError as fileerr:
-        print(fileerr)
     
 def getXctPath(path, checklist):
     filelist = os.listdir(path)
-    if "plotxct.inp" not in filelist:
+    if "ACF.dat" not in filelist:
         for name in filelist:
             if os.path.isdir(os.path.join(path, name)):
                 checklist = getXctPath(os.path.join(path, name), checklist)
@@ -352,21 +204,68 @@ def getXctPath(path, checklist):
         if not any(name.endswith("cube") for name in filelist):
             print()
             print("Warning!!!")
-            print('In folder', path, 'we found plotxct.inp but no .cube file.')
+            print('In folder', path, 'we found ACF.dat but no .cube file.')
             print('Please check if you put all necessary output there.')
         else:
             checklist += [path]
     return checklist
 
+def getPrimitiveCell(supercell):
+    pmganalyzer = SpacegroupAnalyzer(supercell)
+    primitive = pmganalyzer.find_primitive()
+    return primitive
+
+# getAllMols returns a list of pmg Molecule objs, including all fragments inside the supercell
 def getAllMols(supercell, bondDict):
     # molList is the list of pymatgen Molecule object
     # tmpMol is pyatgen Molecule object
     molList = []
     while len(supercell.sites) != 0:
+        # function getCentralSingleMol returns a dictionary
+        # the keys are the index of each sites in supercell
+        print('length of supercell:', len(supercell.sites))
+        molsites = Molecule([], [])
+        molindex = list()
         tmpMol = getCentralSingleMol(supercell, bondDict)
-        molList += [tmpMol]
-        """
-        find out how to delete sites from a supercell!!!
-        """
-        supercell.deletesite(tmpMol)
+        for siteIndex in tmpMol.keys():
+            molsites.append(str(tmpMol[siteIndex].specie), tmpMol[siteIndex].coords)
+            molindex.append(siteIndex)
+        supercell.remove_sites(molindex)
+        molList += [molsites]
     return molList
+
+# take a list of Molecule objects and return the smallest intermolecular distances
+def getInterMolLen(molslist):
+    mollen = 0
+    for mol in molslist:
+        if len(mol.sites) > mollen:
+            mollen = len(mol.sites)
+    for mol in molslist[:]:
+        if len(mol.sites) < mollen:
+            molslist.remove(mol)
+    if len(molslist) >= 2:
+        # choose two random molecules and get an initial intermolecular distance
+        interLen = np.linalg.norm(molslist[0].center_of_mass - molslist[1].center_of_mass)
+        for i, mola in enumerate(molslist):
+            for j, molb in enumerate(molslist):
+                # make sure not counting the difference between the same molecules
+                if (i != j) and (np.linalg.norm(mola.center_of_mass-molb.center_of_mass) < interLen):
+                    interLen = np.linalg.norm(mola.center_of_mass-molb.center_of_mass)
+        return interLen
+    else:
+        raise Exception('Error!!! There are less than two complete molecules inside constructed supercell.\n')
+
+# take a pmg structure and convergence length
+# return the atom index in three dimensions
+def getAtomIndex(struct, convrange):
+    dirabc = list()
+    for d in range(3):
+        cutoff = convrange / struct.lattice.abc[d]
+        dirtmp = np.where(np.logical_or(struct.frac_coords[:, d] < cutoff, struct.frac_coords[:, d] > (1-cutoff)))[0]
+        dirabc += [dirtmp]
+    return dirabc[0], dirabc[1], dirabc[2]
+
+# take the indices and chargematrix, return
+# the charge share for indicated indices
+def getChargeShare(indices, chargematrix):
+    return np.sum(chargematrix[indices], axis=0)[4]

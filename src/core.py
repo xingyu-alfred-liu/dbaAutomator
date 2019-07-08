@@ -1,16 +1,17 @@
 import os
 from functions import *
+from structio import *
 from ref import *
 
 class automator(object):
-    def __init__(self, path, fineGrid, chargeThreshold=0.01):
+    def __init__(self, path, finegrid, chargeThreshold=0.01):
         self.path = path
-        self.fineGrid = fineGrid
+        self.fineGrid = finegrid
         self.bondCutoff = bondCutoff
         self.chargeThreshold = chargeThreshold
         print('Now loading the unit cell information...')
         self.unitcell = loadUnitCell(self.path)
-        self.supercell = getSuperCell(self.path, self.unitcell, self.fineGrid)
+        self.supercell = getSuperCell(self.unitcell, self.fineGrid)
         self.bondDict = getBondDict(self.unitcell, bondCutoff)
     
     def getcentralmol(self, returnmol=False, outputmol=True):
@@ -28,7 +29,7 @@ class automator(object):
         print('Loading the output central single molecule...')
         self.centralmol = loadSingleMol(self.path)
         print('Loading ACF.dat file...')
-        self.chargeMatrix = getChargeMatrix(self.centralmol, os.path.join(self.path, 'singlemolecule'))
+        self.chargeMatrix = loadChargeMatrix(self.centralmol, os.path.join(self.path, 'singlemolecule'))
         print('Looking for hole positions...')
         self.holeSites = getHolePositions(self.chargeMatrix,self.centralmol, \
                                           self.unitcell, self.bondDict, self.chargeThreshold)
@@ -45,23 +46,12 @@ class automator(object):
             print('The input files for plotxct calculations are written under:', os.path.join(self.path, "dba"))
             createPlotxctInput(self.path, self.holeSites, self.fineGrid)
 
-    # the path has to be the path to a folder where one cube file and corresponding 
-    # def checkconvergence(self, path):
-    #     print("Checking convergence now...")
-    #     filelist = os.listdir(path)
-    #     for file in filelist:
-    #         if file.endswith('.cube'):
-    #             cubefilename = file
-    #             break
-    #     cubeSupercell_check = loadCubeCell(os.path.join(path, cubefilename))
-    #     chargeMatrix_check = getChargeMatrix(cubeSupercell_check, os.path.join(path, path))
-
     def caldba(self):
         print('Now calculate charge transfer character...')
         print('Loading the output central single molecule...')
         self.centralmol = loadSingleMol(self.path)
         print('Loading ACF.dat of single molecule HOMO...')
-        self.smcharge = getChargeMatrix(self.centralmol, os.path.join(self.path, 'singlemolecule'))
+        self.smcharge = loadChargeMatrix(self.centralmol, os.path.join(self.path, 'singlemolecule'))
         print('Loading bader results for each hole positions')
         dbapath = os.path.join(self.path, "dba")
         self.holeSites = loadHolePositions(self.path)
@@ -76,7 +66,7 @@ class automator(object):
             print('Loading supercell and ACF.dat at hole index:',hole)
             holepath = os.path.join(dbapath, hole)
             cubeSuperCell = loadCubeCell(holepath)
-            chargematrix = getChargeMatrix(cubeSuperCell, holepath)
+            chargematrix = loadChargeMatrix(cubeSuperCell, holepath)
             molIndex = getMoleculeIndex(self.centralmol, cubeSuperCell)
             chargeshare[hole] = getMolShare(chargematrix, molIndex)
             print('Charge occupation for hole index', hole, 'is:', chargeshare[hole])
@@ -89,7 +79,7 @@ class automator(object):
         chargetransfer = 0
         for hole in holeindexlist:
             chargetransfer += chargeshare[str(hole)] * self.smcharge[hole]
-        print('The total charge transfer character is:', "{:0.2f}".format(chargetransfer*100), "%")
+        print('The total charge transfer character is:', "{:0.2f}".format(chargetransfer*100), "%.")
 
 class checker(object):
     # the path has to be the absolute path to where dba runs
@@ -98,17 +88,27 @@ class checker(object):
         checkList = []
         self.checklist = getXctPath(self.path, checkList)
         if len(self.checklist) == 0:
-            raise Exception('No suitable files found in folder:', self.path)
+            raise Exception('Warning!!! No suitable files found in folder:', self.path, "\n")
         # choose a supercell cell and get the inter molecular distance
         # first get all complete single molecules
-        self.supercell = loadCubeCell(self.checklist[0])
-        self.bondDict = getBondDict(self.supercell, bondCutoff)
-        self.allMols = getAllMols(self.supercell, self.bondDict)
-        self.convrange = getInterMolLen(self.allMols)
-    def checkconv(self):
+        self.tmpsupercell = loadCubeCell(self.checklist[0])
+        self.bondDict = getBondDict(self.tmpsupercell, bondCutoff)
+        print('Looking for the primitive cell...')
+        self.primitive = getPrimitiveCell(self.tmpsupercell)
+        print('Looking for all fragments within constructed supercell...')
+        tmpstruct = self.primitive.copy()
+        tmpstruct = getSuperCell(tmpstruct, [2, 2, 2])
+        self.molslist = getAllMols(tmpstruct, self.bondDict)
+        self.convrange = getInterMolLen(self.molslist)
+        print('The closest distance between center of masses is:', "{:0.2f}".format(self.convrange))
+    def checkconv(self, convThreshold=0.1):
         for name in self.checklist:
             os.chdir(name)
-            print('Now check folder', name)
-            cubeSuperCell = loadCubeCell(name)
-            chargematrix = getChargeMatrix(cubeSuperCell, name)
-            mola, molb, molc = getAtomIndex(cubeSuperCell, convlen)
+            print('Now check folder:', name)
+            chargematrix = loadChargeMatrix(self.tmpsupercell, name)
+            moldira, moldirb, moldirc = getAtomIndex(self.tmpsupercell, self.convrange)
+            chargedira = getChargeShare(moldira, chargematrix)
+            chargedirb = getChargeShare(moldirb, chargematrix)
+            chargedirc = getChargeShare(moldirc, chargematrix)
+            printChargeShare(chargedira, chargedirb, chargedirc, convThreshold)
+            os.chdir('../')
