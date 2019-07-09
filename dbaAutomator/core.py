@@ -1,6 +1,6 @@
 import os
-from functions import *
-from structio import *
+from .functions import *
+from .structio import *
 from ref import *
 
 class automator(object):
