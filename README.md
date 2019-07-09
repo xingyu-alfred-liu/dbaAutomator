@@ -1,4 +1,4 @@
-# dba_automation
+# dbaAutomator
 
 If you are in a hurry, you can only read the contents within
 "!!! IMPORTANT !!!"
@@ -22,7 +22,7 @@ What you need to do:
 !!!!!!!!!!!!!!!!!
 
 Introduction:
-dba_automation is a simple method to automate double-bader analysis (DBA). dba_automation interfaces with the output of
+dbaAutomator is a simple program to automate double-bader analysis (DBA). dbaAutomator interfaces with the output of
 excition wfn calculations (.cube files) performed by BerkeleyGW
 (https://berkeleygw.org/), and most of the DFT codes cope with
 Berkeley, such as Quantum ESPRESSO. 
