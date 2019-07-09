@@ -41,6 +41,7 @@ Functionality:
     - find hole positions with HOMO cube file  
     - generate input file, which is define excition wfn calculation input file  
     - automate bader analysis over exciton wfn result and collect CT percentage  
+    - check the convergence of exciton wfn calculation based on the output cube file and bader analysis
 
 Some external resources:  
     - cube file explanation: http://paulbourke.net/dataformats/cube/  
