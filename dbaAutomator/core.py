@@ -1,7 +1,7 @@
 import os
 from .functions import *
 from .structio import *
-from ref import *
+from .ref import *
 
 class automator(object):
     def __init__(self, path, finegrid, chargeThreshold=0.01):
