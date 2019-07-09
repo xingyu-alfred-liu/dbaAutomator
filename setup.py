@@ -1,17 +1,17 @@
-from setuptools import setup
+from setuptools import setup, find_packages
+
+with open('README.md', 'r') as fh:
+    long_description = fh.read()
 
 setup(
         name='dbaAutomator',
-        version='1.0',
+        version='0.1.0',
         description='Automate Double-Bader Analysis (dba) Process',
+        long_description=long_description,
+        long_description_content_type="text/markdown",
         author='Xingyu (Alfred) Liu',
         author_email='xingyul1@andrew.cmu.edu, xingyu.alfred.liu@gmail.com',
-        packages=['dbaAutomator'],  #same as name
-        install_requires=['numpy', 'pymatgen>=2018.11.6', 'ase>=3.17'], #external packages as dependencies
-        scripts=[
-            'src/functions.py',
-            'src/structio.py',
-            'src/ref.py',
-            'src/core.py',
-            ]
+        url="https://github.com/BLABABA/dbaAutomator.git",
+        packages=find_packages(),
+        install_requires=['numpy', 'pymatgen', 'ase'],
 )

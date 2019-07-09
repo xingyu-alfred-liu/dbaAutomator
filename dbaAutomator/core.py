@@ -19,10 +19,13 @@ class automator(object):
         print('Now finding the central single molecule...')
         self.singleMol = getCentralSingleMol(self.supercell, self.bondDict)
         if outputmol:
+            for key in self.singleMol.keys():
+                print(key, self.singleMol[key])
             outputMolecule(self.singleMol, self.path)
         if returnmol:
             print('The chosen single molecule is:')
-            print(self.singleMol)
+            for key in self.singleMol.keys():
+                print(key, self.singleMol[key])
             return self.singleMol
 
     def getholes(self, returnholes=False, outputholes=True, writeinput=True):
