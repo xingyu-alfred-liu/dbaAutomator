@@ -87,7 +87,7 @@ def loadChargeMatrix(struct, path):
     return chargeMatrix
 
 def outputHolePositions(holeSites, path):
-    supercellPath = os.path.join(path, '/supercell')
+    supercellPath = os.path.join(path, 'supercell')
     # json does not allow numpy,int64
     # convert values into list of float
     filename = 'holePositions.json'
@@ -96,13 +96,13 @@ def outputHolePositions(holeSites, path):
         print('The old file will be rewritten')
         decision = 'A+'
         while decision != 'Y' and decision != 'N':
-            decision = input('Do you want to proceed? Y for \'yes\' and N for \'no\.')
+            decision = input('Do you want to proceed? Y for \'yes\' and N for \'no\'.\n')
             if decision == 'Y':
                 pass
             elif decision == 'N':
                 return 0
             else:
-                print('Please type in either Y or N!!!')
+                print('Please type in either Y or N.')
     tmpdict = dict()
     for key in holeSites.keys():
         tmpdict[int(key)] = list(holeSites[key])

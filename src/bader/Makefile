@@ -29,11 +29,12 @@ OBJS = kind_mod.o       \
 bader: $(OBJS) main.o
 	rm -f bader 
 	$(FC) $(LINK) main.o -o $@ $(OBJS) 
+	cp -f bader ../../bin
 
 dist: bader
 	tar -cf bader_lnx_64.tar bader
 	gzip -9 bader_lnx_64.tar
 
 clean:
-	rm -f *.o *.mod bader bader_lnx_64.tar.gz
+	rm -f *.o *.mod bader bader_lnx_64.tar.gz ../../bin/*
 

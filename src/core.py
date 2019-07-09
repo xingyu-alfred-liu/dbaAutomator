@@ -11,7 +11,8 @@ class automator(object):
         self.chargeThreshold = chargeThreshold
         print('Now loading the unit cell information...')
         self.unitcell = loadUnitCell(self.path)
-        self.supercell = getSuperCell(self.unitcell, self.fineGrid)
+        tmpunitcell = self.unitcell.copy()
+        self.supercell = getSuperCell(tmpunitcell, self.fineGrid)
         self.bondDict = getBondDict(self.unitcell, bondCutoff)
     
     def getcentralmol(self, returnmol=False, outputmol=True):
@@ -31,8 +32,8 @@ class automator(object):
         print('Loading ACF.dat file...')
         self.chargeMatrix = loadChargeMatrix(self.centralmol, os.path.join(self.path, 'singlemolecule'))
         print('Looking for hole positions...')
-        self.holeSites = getHolePositions(self.chargeMatrix,self.centralmol, \
-                                          self.unitcell, self.bondDict, self.chargeThreshold)
+        tmpunitcell = self.unitcell.copy()
+        self.holeSites = getHolePositions(self.chargeMatrix,self.centralmol,tmpunitcell,self.bondDict,self.chargeThreshold)
         if returnholes:
             print()
             print('The chosen holes are:')

@@ -87,9 +87,7 @@ def getBondDict(supercell, bondCutoff):
 
 def getSuperCell(unitcell, finegrid):
     if finegrid != []:
-        print()
         print('Reminder: Please make sure you type the correct fine grid')
-        print()
         unitcell.make_supercell(finegrid)
     else:
         sys.exit('No definitions found in finegrid, please make sure you input it when define automator.\n')
@@ -123,6 +121,7 @@ def getHolePositions(chargeMatrix, singleMol, unitcell, bondDict, chargeThreshol
                         removeSite = site
                 twoNeighbors.remove(removeSite)
         holePositions[charindex] = findHole(unitcell, twoNeighbors, chargeSite)
+        print(holePositions)
     return holePositions
 
 def findHole(unitcell, twoNeighbors, chargeSite):
@@ -134,6 +133,9 @@ def findHole(unitcell, twoNeighbors, chargeSite):
     holePosition = [0, 0, 0]
     for i in range(3):
         holePosition[i] = chargeSite.coords[i] + normalVec[i]*shift
+    print()
+    print(chargeSite)
+    print(holePosition)
     unitcell.append('He', holePosition, coords_are_cartesian=True)
     return unitcell.sites[-1].frac_coords
 
@@ -159,12 +161,12 @@ def createPlotxctInput(path, holeSites, fineGrid):
         plotxctpath = os.path.join(dbapath, str(key))
         os.system('mkdir '+plotxctpath)
         with open(os.path.join(plotxctpath, 'plotxct.inp'), 'w') as outfile:
-            outfile.write("Index of state to be plotted, as it appears in eigenvectors\n\
-                           plot_state 1\n")
+            outfile.write("# Index of state to be plotted, as it appears in eigenvectors\nplot_state 1\n")
             outfile.write("# Size of supercell\n")
             outfile.write("supercell_size  ")
             for grid in fineGrid:
                 outfile.write(str(grid)+'  ')
+            outfile.write('\n')
             outfile.write("# coordinates of hole, in units of lattice vectors\n")
             outfile.write('hole_position   ')
             for value in holeSites[key]:
