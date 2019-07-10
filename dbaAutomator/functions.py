@@ -47,7 +47,7 @@ def getSingleMol(supercell, middleSite, bondDict, middleSiteIndex):
             if site[2] not in singleMol.keys():
                 candidates += [site[0]]
                 candidatesIndex += [site[2]]
-        print('Number of atoms in this molecule:')
+        print('Number of atoms found in this molecule:')
         print(len(singleMol))
         tmpSites = []
     return singleMol
@@ -134,8 +134,9 @@ def findHole(unitcell, twoNeighbors, chargeSite):
     print()
     print(chargeSite)
     print(holePosition)
-    unitcell.append('He', holePosition, coords_are_cartesian=True)
-    return unitcell.sites[-1].frac_coords
+    tmpcell = unitcell.copy()
+    tmpcell.append('He', holePosition, coords_are_cartesian=True)
+    return tmpcell.sites[-1].frac_coords
 
 def calNormalVector(p1, p2, p3):
     # generate the vector

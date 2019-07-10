@@ -6,7 +6,7 @@ from .ref import *
 # automator is the core class for dbaAutomator, functions are:
 # 1. select the molecule in the middle of the supercell
 # 2. get the hole positions for corresponding HOMO
-# 3. calculate DBA according to previous calculations
+# 3. calculate DBA according to previous procedures
 class automator(object):
 
     def __init__(self, path, finegrid, chargeThreshold=0.01):
@@ -109,6 +109,8 @@ class checker(object):
         self.checklist = getXctPath(self.path, checkList)
         if len(self.checklist) == 0:
             raise Exception('Warning!!! No suitable files found in folder:', self.path, "\n")
+    
+    def calintermoldist(self):
         # choose a supercell cell and get the inter molecular distance
         # first get all complete single molecules
         self.tmpsupercell = loadCubeCell(self.checklist[0])
@@ -121,7 +123,7 @@ class checker(object):
         self.molslist = getAllMols(tmpstruct, self.bondDict)
         self.convrange = getInterMolLen(self.molslist)
         print('The closest distance between center of masses is:', "{:0.2f}".format(self.convrange))
-    
+
     def checkconv(self, convThreshold=0.1):
         for name in self.checklist:
             os.chdir(name)
@@ -146,12 +148,14 @@ class checker(object):
             supercell = loadCubeCell(name)
             chargematrix = loadChargeMatrix(supercell, name)
             holePosition = loadPlotxct(name)
+            print('The hole position in the input file is:', holePosition)
             tmpunitcell = self.unitcell.copy()
             tmpunitcell.append('He', holePosition)
             holeCartesianCoords = tmpunitcell.sites[-1].coords
+            print('The Cartesian coordinates for this hole position is:', holeCartesianCoords)
             # get teh fractional coords for hole
             tmpcube = supercell.copy()
-            tmpcube.append('He', holeCartesianCoords)
+            tmpcube.append('He', holeCartesianCoords, coords_are_cartesian=True)
             holeFracCoords = tmpcube.sites[-1].frac_coords
             singleMol = getCentralSingleMol(supercell, self.bondDict, middle=holeFracCoords)
             # need to construct a Molecule object to be passed into getMoleculeIndex

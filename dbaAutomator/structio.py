@@ -7,6 +7,8 @@ from ase.io import read
 import numpy as np
 import json
 
+# singleMol is a dictionary, keys are atom index, values are pmg sites
+# dataDir is the datapath, /dbaAutomator/data
 def outputMolecule(singleMol, dataDir):
     molecule = Molecule([], [])
     singlemolpath = os.path.join(dataDir, 'singlemolecule')
