@@ -52,10 +52,9 @@ def getSingleMol(supercell, middleSite, bondDict, middleSiteIndex):
         tmpSites = []
     return singleMol
 
-def getCentralSingleMol(supercell, bondDict):
+def getCentralSingleMol(supercell, bondDict, middle=[0.5, 0.5, 0.5]):
     # find site in the middle
     dist = 1
-    middle = [0.5, 0.5, 0.5]
     for i, site in enumerate(supercell.sites):
         if np.linalg.norm(middle-site.frac_coords) < dist:
             dist = np.linalg.norm(middle-site.frac_coords)
@@ -150,26 +149,6 @@ def calNormalVector(p1, p2, p3):
     for i in range(3):
         vector[i] = vector[i] / sigma
     return vector
-
-# this function will create a list of directories
-# name them with the charge site index of the single molecule
-# and place the plot_xct input files there
-def createPlotxctInput(path, holeSites, fineGrid):
-    dbapath = os.path.join(path, 'dba')
-    for key in holeSites.keys():
-        plotxctpath = os.path.join(dbapath, str(key))
-        os.system('mkdir '+plotxctpath)
-        with open(os.path.join(plotxctpath, 'plotxct.inp'), 'w') as outfile:
-            outfile.write("# Index of state to be plotted, as it appears in eigenvectors\nplot_state 1\n")
-            outfile.write("# Size of supercell\n")
-            outfile.write("supercell_size  ")
-            for grid in fineGrid:
-                outfile.write(str(grid)+'  ')
-            outfile.write('\n')
-            outfile.write("# coordinates of hole, in units of lattice vectors\n")
-            outfile.write('hole_position   ')
-            for value in holeSites[key]:
-                outfile.write(str(value)+'  ')
 
 def getMoleculeIndex(singleMol, cubecell, threshold = 0.01):
     molIndex = dict()

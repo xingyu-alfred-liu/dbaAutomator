@@ -74,7 +74,7 @@ def loadChargeMatrix(struct, path):
                     pass
     except FileNotFoundError as fileerr:
         print(fileerr)
-        print('!!! Error !!!')
+        print('Error !!!')
         print('Please make sure the Bader output is put into single Molecule Directory.')
         return 0
     chargeMatrix = np.array(chargeMatrix)
@@ -151,3 +151,38 @@ def printChargeShare(a, b, c, convThreshold):
     if c > convThreshold:
         print('!!! Warning !!!')
         print('Boundary atoms in direction c occupies more than', "{:0.2f}".format(convThreshold*100), "%", "charge.")
+
+# this function will create a list of directories
+# name them with the charge site index of the single molecule
+# and place the plot_xct input files there
+def createPlotxctInput(path, holeSites, fineGrid):
+    dbapath = os.path.join(path, 'dba')
+    for key in holeSites.keys():
+        plotxctpath = os.path.join(dbapath, str(key))
+        os.system('mkdir '+plotxctpath)
+        with open(os.path.join(plotxctpath, 'plotxct.inp'), 'w') as outfile:
+            outfile.write("# Index of state to be plotted, as it appears in eigenvectors\nplot_state 1\n")
+            outfile.write("# Size of supercell\n")
+            outfile.write("supercell_size  ")
+            for grid in fineGrid:
+                outfile.write(str(grid)+'  ')
+            outfile.write('\n')
+            outfile.write("# coordinates of hole, in units of lattice vectors\n")
+            outfile.write('hole_position   ')
+            for value in holeSites[key]:
+                outfile.write(str(value)+'  ')
+
+def loadPlotxct(path):
+    try:
+        with open(os.path.join(path, "plotxct.inp"), 'r') as f:
+            for line in f:
+                if "hole_position" in line:
+                    tmpline = line.split()
+                    holePosition = tmpline[1:]
+        for i, val in enumerate(holePosition):
+            holePosition[i] = float(val)
+    except FileNotFoundError as fileerr:
+        print(fileerr)
+        print('Please make sure your plotxct.inp is put under:', path)
+        sys.exit()
+    return holePosition

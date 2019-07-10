@@ -3,7 +3,12 @@ from .functions import *
 from .structio import *
 from .ref import *
 
+# automator is the core class for dbaAutomator, functions are:
+# 1. select the molecule in the middle of the supercell
+# 2. get the hole positions for corresponding HOMO
+# 3. calculate DBA according to previous calculations
 class automator(object):
+
     def __init__(self, path, finegrid, chargeThreshold=0.01):
         self.path = path
         self.fineGrid = finegrid
@@ -63,9 +68,10 @@ class automator(object):
         # need to check if they are all holes, delte those aren't
         holelist = os.listdir(dbapath)
         for hole in holelist[:]:
-            if not os.path.isdir(hole):
+            if hole not in self.holeSites.keys():
                 holelist.remove(hole)
         print('Checking if holes match with previous settings...')
+        # check the other way
         for key in self.holeSites.keys():
             if key not in holelist:
                 raise Exception('Hole position No.', key, 'is not in dba folder.')
@@ -85,13 +91,17 @@ class automator(object):
             print(hole, ":", "{:0.2f}".format((1-chargeshare[hole])*100))
         print('Computing charge transfer character now...')
         holeindexlist = np.array(holelist).astype(int)
-        self.smcharge = self.smcharge / (np.sum(self.smcharge(holeindexlist), axis=0)[4])
+        self.smcharge = self.smcharge / (np.sum(self.smcharge[holeindexlist], axis=0)[4])
         chargetransfer = 0
         for hole in holeindexlist:
             chargetransfer += chargeshare[str(hole)] * self.smcharge[hole]
         print('The total charge transfer character is:', "{:0.2f}".format(chargetransfer*100), "%.")
 
+
+# checker is a supporting class, it can check the convergence for plotxct calculation
+# it can also calculate CT character for individual folders
 class checker(object):
+
     # the path has to be the absolute path to where dba runs
     def __init__(self, path):
         self.path = path
@@ -129,9 +139,27 @@ class checker(object):
     
     def calCT(self, datapath):
         self.unitcell = loadUnitCell(datapath)
+        self.bondDict = getBondDict(self.unitcell, bondCutoff)
         for name in self.checklist:
             os.chdir(name)
-            print('Now calculating CT character in folder:', name)
-            tmpcube = loadCubeCell(name)
-            chargematrix = loadChargeMatrix(tmpcube, name)
+            print('Now calculating charge transfer character in folder:', name)
+            supercell = loadCubeCell(name)
+            chargematrix = loadChargeMatrix(supercell, name)
+            holePosition = loadPlotxct(name)
+            tmpunitcell = self.unitcell.copy()
+            tmpunitcell.append('He', holePosition)
+            holeCartesianCoords = tmpunitcell.sites[-1].coords
+            # get teh fractional coords for hole
+            tmpcube = supercell.copy()
+            tmpcube.append('He', holeCartesianCoords)
+            holeFracCoords = tmpcube.sites[-1].frac_coords
+            singleMol = getCentralSingleMol(supercell, self.bondDict, middle=holeFracCoords)
+            # need to construct a Molecule object to be passed into getMoleculeIndex
+            centralmol = Molecule([], [])
+            for siteindex in singleMol.keys():
+                centralmol.append(str(singleMol[siteindex].specie), singleMol[siteindex].coords)
+            molIndex = getMoleculeIndex(centralmol, supercell)
+            # calculate the Frenkel character for this hole position
+            frenkel = getMolShare(chargematrix, molIndex)
+            print('The charge transfer character for this hole position is:', "{:0.2f}".format((1-frenkel)*100), "%.")
             os.chdir("../")
