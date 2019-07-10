@@ -59,7 +59,12 @@ class automator(object):
         print('Loading bader results for each hole positions')
         dbapath = os.path.join(self.path, "dba")
         self.holeSites = loadHolePositions(self.path)
+        # get the list of path for holes
+        # need to check if they are all holes, delte those aren't
         holelist = os.listdir(dbapath)
+        for hole in holelist[:]:
+            if not os.path.isdir(hole):
+                holelist.remove(hole)
         print('Checking if holes match with previous settings...')
         for key in self.holeSites.keys():
             if key not in holelist:
@@ -67,6 +72,7 @@ class automator(object):
         # the charge occupation for each hole will be stored at chargeshare dict
         chargeshare = dict()
         for hole in holelist:
+            print()
             print('Loading ACF.dat at hole index:',hole)
             holepath = os.path.join(dbapath, hole)
             cubeSuperCell = loadCubeCell(holepath)
@@ -74,7 +80,6 @@ class automator(object):
             molIndex = getMoleculeIndex(self.centralmol, cubeSuperCell)
             chargeshare[hole] = getMolShare(chargematrix, molIndex)
             print('Charge occupation for hole index', hole, 'is:', "{:0.2f}".format(chargeshare[hole]*100), "%.")
-            print()
         print('The charge transfer character for each hole positions:')
         for hole in chargeshare.keys():
             print(hole, ":", "{:0.2f}".format((1-chargeshare[hole])*100))
@@ -106,14 +111,27 @@ class checker(object):
         self.molslist = getAllMols(tmpstruct, self.bondDict)
         self.convrange = getInterMolLen(self.molslist)
         print('The closest distance between center of masses is:', "{:0.2f}".format(self.convrange))
+    
     def checkconv(self, convThreshold=0.1):
         for name in self.checklist:
             os.chdir(name)
+            print()
             print('Now check folder:', name)
-            chargematrix = loadChargeMatrix(self.tmpsupercell, name)
-            moldira, moldirb, moldirc = getAtomIndex(self.tmpsupercell, self.convrange)
+            print('Loading cube file and ACF.dat...')
+            tmpcube = loadCubeCell(name)
+            chargematrix = loadChargeMatrix(tmpcube, name)
+            moldira, moldirb, moldirc = getAtomIndex(tmpcube, self.convrange)
             chargedira = getChargeShare(moldira, chargematrix)
             chargedirb = getChargeShare(moldirb, chargematrix)
             chargedirc = getChargeShare(moldirc, chargematrix)
             printChargeShare(chargedira, chargedirb, chargedirc, convThreshold)
             os.chdir('../')
+    
+    def calCT(self, datapath):
+        self.unitcell = loadUnitCell(datapath)
+        for name in self.checklist:
+            os.chdir(name)
+            print('Now calculating CT character in folder:', name)
+            tmpcube = loadCubeCell(name)
+            chargematrix = loadChargeMatrix(tmpcube, name)
+            os.chdir("../")
