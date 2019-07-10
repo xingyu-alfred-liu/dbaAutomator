@@ -88,14 +88,14 @@ class automator(object):
             print('Charge occupation for hole index', hole, 'is:', "{:0.2f}".format(chargeshare[hole]*100), "%.")
         print('The charge transfer character for each hole positions:')
         for hole in chargeshare.keys():
-            print(hole, ":", "{:0.2f}".format((1-chargeshare[hole])*100))
+            print(hole, ":", "{:0.2f}".format((1-chargeshare[hole])*100), "%")
         print('Computing charge transfer character now...')
-        holeindexlist = np.array(holelist).astype(int)
-        self.smcharge = self.smcharge / (np.sum(self.smcharge[holeindexlist], axis=0)[4])
+        self.holeindexlist = np.array(holelist).astype(int)
+        self.smcharge = self.smcharge / (np.sum(self.smcharge[self.holeindexlist], axis=0)[4])
         chargetransfer = 0
-        for hole in holeindexlist:
-            chargetransfer += chargeshare[str(hole)] * self.smcharge[hole]
-        print('The total charge transfer character is:', "{:0.2f}".format(chargetransfer*100), "%.")
+        for hole in self.holeindexlist:
+            chargetransfer += chargeshare[str(hole)] * self.smcharge[hole][4]
+        print('The total charge transfer character is:', "{:0.2f}".format((1-chargetransfer)*100), "%.")
 
 
 # checker is a supporting class, it can check the convergence for plotxct calculation
@@ -110,7 +110,7 @@ class checker(object):
         if len(self.checklist) == 0:
             raise Exception('Warning!!! No suitable files found in folder:', self.path, "\n")
     
-    def calintermoldist(self):
+    def caldist(self):
         # choose a supercell cell and get the inter molecular distance
         # first get all complete single molecules
         self.tmpsupercell = loadCubeCell(self.checklist[0])
@@ -124,7 +124,7 @@ class checker(object):
         self.convrange = getInterMolLen(self.molslist)
         print('The closest distance between center of masses is:', "{:0.2f}".format(self.convrange))
 
-    def checkconv(self, convThreshold=0.1):
+    def checkconv(self, convThreshold=0.05):
         for name in self.checklist:
             os.chdir(name)
             print()
@@ -144,6 +144,7 @@ class checker(object):
         self.bondDict = getBondDict(self.unitcell, bondCutoff)
         for name in self.checklist:
             os.chdir(name)
+            print()
             print('Now calculating charge transfer character in folder:', name)
             supercell = loadCubeCell(name)
             chargematrix = loadChargeMatrix(supercell, name)
