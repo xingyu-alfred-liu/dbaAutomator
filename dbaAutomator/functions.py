@@ -121,7 +121,6 @@ def getHolePositions(chargeMatrix, singleMol, unitcell, bondDict, chargeThreshol
                         removeSite = site
                 twoNeighbors.remove(removeSite)
         holePositions[charindex] = findHole(unitcell, twoNeighbors, chargeSite)
-        print(holePositions)
     return holePositions
 
 def findHole(unitcell, twoNeighbors, chargeSite):
@@ -179,7 +178,6 @@ def getMoleculeIndex(singleMol, cubecell, threshold = 0.01):
             if (np.linalg.norm(molsite.coords-cellsite.coords)<threshold) and (str(cellsite.specie)==str(molsite.specie)):
                 molIndex[i] = j
             continue
-    print('The length of the hole positioned molecule:', len(molIndex.keys()))
     if len(molIndex.keys()) != singleMol.num_sites:
         print('Error!!!')
         print('The number of atoms within a single molecule found in the cube file\
