@@ -1,8 +1,7 @@
 # dbaAutomator
 ## Introduction
 
-dbaAutomator automates double-bader analysis (DBA). It interfaces with exciton wavefunction (ext wfn) calculations output `cube` files performed by [BerkeleyGW]
-(https://berkeleygw.org/), orbital files computed with most DFT codes such as [FHI-aims](https://aimsclub.fhi-berlin.mpg.de/) and [Quantum ESPRESSO](https://www.quantum-espresso.org/), [Bader Charge Analysis](http://theory.cm.utexas.edu/henkelman/code/bader/) output `ACF.dat`.
+dbaAutomator automates double-bader analysis (DBA). It interfaces with exciton wavefunction (ext wfn) calculations output `cube` files performed by [BerkeleyGW](https://berkeleygw.org/), orbital files computed with most DFT codes such as [FHI-aims](https://aimsclub.fhi-berlin.mpg.de/) and [Quantum ESPRESSO](https://www.quantum-espresso.org/), [Bader Charge Analysis](http://theory.cm.utexas.edu/henkelman/code/bader/) output `ACF.dat`.
 
 **_Note: we are still working on extending the functionalities of dbaAutomator, such as provide bader analysis binaries, compute HOMO for selected single molecule, etc._**
 
