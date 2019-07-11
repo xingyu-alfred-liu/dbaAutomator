@@ -52,8 +52,7 @@ Import `dbaAutomator.core.automator` and `os`
 
 Define `datapath, finegrid, filepath`  
 
-`datapath`  
-  - **_string_**  
+`datapath`: **_string_**  
 The absolute path where you want to put your data in. We suggest every users create a new directory, such as:  
 
     >>> os.mkdir data
@@ -61,14 +60,12 @@ The absolute path where you want to put your data in. We suggest every users cre
     >>> os.path.abspath('.')
     '/TheBestUser/PATH/TO/data'
 
-`finegrid`:   
-  - **_list_**  
+`finegrid`: **_list_**  
 The fine grid defined in mean-field calculation to obtain the fine grid wavefunction `WFN`. It can be found in file `kgrid.in`. Here we define `[a, b, c]` as a list of arbitrary positive integers.
 
     >>> finegrid = [a, b, c]
-`filepath`:  
-  - **_string_**  
-  The absolute path to the input file which defines the unit cell. Here we use the `in` of Quantum ESPRESSO as an example.
+`filepath`: **_string_**  
+The absolute path to the input file which defines the unit cell. Here we use the `in` of Quantum ESPRESSO as an example.
 
     >>> filepath = '/TheBestUser/PATH/TO/in'
 Define the automator object. The initial setup will lead to creation of necessary directories, duplication of input file to directory `unitcell`, and construction of supercell. 
