@@ -54,7 +54,7 @@ Define `datapath, finegrid, filepath`
 
 `datapath`  
   - **_string_**  
-  The absolute path where you want to put your data in. We suggest every users create a new directory, such as:  
+The absolute path where you want to put your data in. We suggest every users create a new directory, such as:  
 
     >>> os.mkdir data
     >>> os.chdir('data')
@@ -63,7 +63,7 @@ Define `datapath, finegrid, filepath`
 
 `finegrid`:   
   - **_list_**  
-  The fine grid defined in mean-field calculation to obtain the fine grid wavefunction `WFN`. It can be found in file `kgrid.in`. Here we define `[a, b, c]` as a list of arbitrary positive integers.
+The fine grid defined in mean-field calculation to obtain the fine grid wavefunction `WFN`. It can be found in file `kgrid.in`. Here we define `[a, b, c]` as a list of arbitrary positive integers.
 
     >>> finegrid = [a, b, c]
 `filepath`:  
