@@ -23,8 +23,8 @@ def outputMolecule(singleMol, dataDir):
             decision = input('Do you want to proceed? Y for yes, N for no.')
             if decision == 'Y':
                 xyzObj.write_file(os.path.join(singlemolpath, 'singleMol.xyz'))
-                print('The single molecule structure and corresponding index in the supercell is saved under \'/data/singlemolecule\'')
-                print('It\'s named as \'singleMol.xyz\'.')
+                print('The single molecule structure is saved under:', os.path.join(dataDir, 'singlemolecule'))
+                print('It\'s named as: singleMol.xyz.')
             elif decision == 'N':
                 print('The previous file is not changed. ')
                 sys.exit()
@@ -32,32 +32,28 @@ def outputMolecule(singleMol, dataDir):
                 print('Not eligible response!!!\n')
     else:
         xyzObj.write_file(os.path.join(singlemolpath, 'singleMol.xyz'))
-        print('The single molecule structure and corresponding index in the supercell is saved under \'/data/singlemolecule\'')
-        print('It\'s named as \'singleMol.xyz\'.')
+        print('The single molecule structure is saved under:', os.path.join(dataDir, 'singlemolecule/singleMol.xyz'))
 
+# loadUnitCell handles both file and dir
+# file has to be the DFT input unitcell file
+# dir has to be the data dir
 def loadUnitCell(path):
-    unitcellpath = path+'/unitcell'
-    fileNum = len(os.listdir(unitcellpath))
-    if fileNum == 0:
-        print('Error!!!')
-        print('Please include unit cell information under /data/unitcell')
-        return 0
-    else:
+    if os.path.isfile(path):
+        unitcell = read(path)
+    elif os.path.isdir(path):
+        unitcellpath = os.path.join(path, 'unitcell')
         filelist = os.listdir(unitcellpath)
-        if 'kgrid.in' in filelist:
-            filelist.remove('kgrid.in')
-        for filename in filelist:
-            if filename.startswith('.'):
-                filelist.remove(filename)
-        unitcell = read(os.path.join(unitcellpath, filelist[0]))
-        if unitcell == 0:
-            print('There is no readable input file in /data/unitcell')
-            print('Please check the instructions or change your unit cell format')
-            return 0
-        else:
-            unitcell.set_pbc((True, True, True))
-            pmgobj = AseAtomsAdaptor()
-            pmgstruct = pmgobj.get_structure(unitcell)
+        for name in filelist:
+            try:
+                unitcell = read(os.path.join(unitcellpath, name))
+                if len(unitcell.get_positions()) != 0:
+                    print('Please make sure this is the file you want to load:', os.path.join(unitcellpath, name))
+                    break
+            except:
+                pass
+    unitcell.set_pbc((True, True, True))
+    pmgobj = AseAtomsAdaptor()
+    pmgstruct = pmgobj.get_structure(unitcell)
     return pmgstruct
 
 def loadSingleMol(path):
@@ -78,7 +74,7 @@ def loadChargeMatrix(struct, path):
         print(fileerr)
         print('Error !!!')
         print('Please make sure the Bader output is put into single Molecule Directory.')
-        return 0
+        sys.exit()
     chargeMatrix = np.array(chargeMatrix)
     chargeMatrix = chargeMatrix.astype(float)
     if struct.num_sites != len(chargeMatrix):
@@ -98,11 +94,11 @@ def outputHolePositions(holeSites, path):
         print('The old file will be rewritten')
         decision = 'A+'
         while decision != 'Y' and decision != 'N':
-            decision = input('Do you want to proceed? Y for \'yes\' and N for \'no\'.\n')
+            decision = input('Do you want to proceed? \'Y\' for yes and \'N\' for no.')
             if decision == 'Y':
                 pass
             elif decision == 'N':
-                return 0
+                sys.exit()
             else:
                 print('Please type in either Y or N.')
     tmpdict = dict()

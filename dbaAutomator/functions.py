@@ -14,6 +14,7 @@ from copy import deepcopy
 from pymatgen import Molecule
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from itertools import filterfalse
+from shutil import copy2
 import math
 
 def getSingleMol(supercell, middleSite, bondDict, middleSiteIndex):
@@ -47,8 +48,7 @@ def getSingleMol(supercell, middleSite, bondDict, middleSiteIndex):
             if site[2] not in singleMol.keys():
                 candidates += [site[0]]
                 candidatesIndex += [site[2]]
-        print('Number of atoms found in this molecule:')
-        print(len(singleMol))
+        print('Number of atoms found in this molecule:', len(singleMol))
         tmpSites = []
     return singleMol
 
@@ -86,7 +86,7 @@ def getBondDict(supercell, bondCutoff):
 
 def getSuperCell(unitcell, finegrid):
     if finegrid != []:
-        print('Reminder: Please make sure you type the correct fine grid')
+        print('Reminder: Please make sure you type in the correct fine grid.')
         unitcell.make_supercell(finegrid)
     else:
         sys.exit('No definitions found in finegrid, please make sure you input it when define automator.\n')
@@ -249,3 +249,17 @@ def getAtomIndex(struct, convrange):
 # the charge share for indicated indices
 def getChargeShare(indices, chargematrix):
     return np.sum(chargematrix[indices], axis=0)[4]
+
+def checkDataFolder(path):
+    folderlist = ['dba', 'singlemolecule', 'supercell', 'unitcell']
+    for foldername in folderlist:
+        try:
+            os.mkdir(os.path.join(path, foldername))
+            print('Directory', foldername, 'created.')
+        except FileExistsError:
+            print('Directory', foldername, 'already exists.')
+
+def copyInput(file, path):
+    unitcellpath = os.path.join(path, 'unitcell')
+    print('Copy unitcell file to', unitcellpath, '.')
+    copy2(file, unitcellpath)

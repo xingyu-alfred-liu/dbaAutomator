@@ -9,8 +9,11 @@ from .ref import *
 # 3. calculate DBA according to previous procedures
 class automator(object):
 
-    def __init__(self, path, finegrid, chargeThreshold=0.01):
+    def __init__(self, path, finegrid, file, chargeThreshold=0.01):
         self.path = path
+        # check if there are necessary folders inside data folder
+        checkDataFolder(self.path)
+        copyInput(file, self.path)
         self.fineGrid = finegrid
         self.bondCutoff = bondCutoff
         self.chargeThreshold = chargeThreshold
@@ -20,10 +23,11 @@ class automator(object):
         self.supercell = getSuperCell(tmpunitcell, self.fineGrid)
         self.bondDict = getBondDict(self.unitcell, bondCutoff)
     
-    def getcentralmol(self, returnmol=False, outputmol=True):
+    def getmol(self, returnmol=False, outputmol=True):
         print('Now finding the central single molecule...')
         self.singleMol = getCentralSingleMol(self.supercell, self.bondDict)
         if outputmol:
+            print()
             for key in self.singleMol.keys():
                 print(key, self.singleMol[key])
             outputMolecule(self.singleMol, self.path)
@@ -91,10 +95,10 @@ class automator(object):
             print(hole, ":", "{:0.2f}".format((1-chargeshare[hole])*100), "%")
         print('Computing charge transfer character now...')
         self.holeindexlist = np.array(holelist).astype(int)
-        self.smcharge = self.smcharge / (np.sum(self.smcharge[self.holeindexlist], axis=0)[4])
+        tmpcharge = self.smcharge / (np.sum(self.smcharge[self.holeindexlist], axis=0)[4])
         chargetransfer = 0
         for hole in self.holeindexlist:
-            chargetransfer += chargeshare[str(hole)] * self.smcharge[hole][4]
+            chargetransfer += chargeshare[str(hole)] * tmpcharge[hole][4]
         print('The total charge transfer character is:', "{:0.2f}".format((1-chargetransfer)*100), "%.")
 
 
@@ -139,8 +143,8 @@ class checker(object):
             printChargeShare(chargedira, chargedirb, chargedirc, convThreshold)
             os.chdir('../')
     
-    def calCT(self, datapath):
-        self.unitcell = loadUnitCell(datapath)
+    def calct(self, file):
+        self.unitcell = loadUnitCell(file)
         self.bondDict = getBondDict(self.unitcell, bondCutoff)
         for name in self.checklist:
             os.chdir(name)
