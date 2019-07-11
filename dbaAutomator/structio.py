@@ -23,8 +23,7 @@ def outputMolecule(singleMol, dataDir):
             decision = input('Do you want to proceed? Y for yes, N for no.')
             if decision == 'Y':
                 xyzObj.write_file(os.path.join(singlemolpath, 'singleMol.xyz'))
-                print('The single molecule structure is saved under:', os.path.join(dataDir, 'singlemolecule'))
-                print('It\'s named as: singleMol.xyz.')
+                print('The single molecule structure is saved under:', os.path.join(dataDir, 'singlemolecule.singleMol.xyz'))
             elif decision == 'N':
                 print('The previous file is not changed. ')
                 sys.exit()
@@ -98,7 +97,7 @@ def outputHolePositions(holeSites, path):
             if decision == 'Y':
                 pass
             elif decision == 'N':
-                sys.exit()
+                sys.exit('Exit now...')
             else:
                 print('Please type in either Y or N.')
     tmpdict = dict()
@@ -184,3 +183,26 @@ def loadPlotxct(path):
         print('Please make sure your plotxct.inp is put under:', path)
         sys.exit()
     return holePosition
+
+# write the result of dba into a folder
+def writedbaResult(path, chargeshare, chargetransfer):
+    supercellPath = os.path.join(path, 'supercell')
+    # json does not allow numpy,int64
+    # convert values into list of float
+    filename = 'dba.txt'
+    if filename in os.listdir(supercellPath):
+        print('There is one dba.txt from previous calculation')
+        print('The old file will be rewritten')
+        decision = None
+        while decision != 'Y' and decision != 'N':
+            decision = input('Do you want to proceed? \'Y\' for yes and \'N\' for no.')
+            if decision == 'Y':
+                pass
+            elif decision == 'N':
+                sys.exit('Exit now...')
+            else:
+                print('Please type in either Y or N.')
+    with open(os.path.join(supercellPath, filename), 'w') as file:
+        for hole in chargeshare.keys():
+            file.write('The charge transfer for hole', hole, 'is:', "{:0.2f}".format((1-chargeshare[hole])*100), "%.\n")
+        file.write('The total charge transfer is:', "{:0.2f}".format((1-chargetransfer)*100), "%.\n")

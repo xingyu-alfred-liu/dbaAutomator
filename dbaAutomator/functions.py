@@ -131,9 +131,6 @@ def findHole(unitcell, twoNeighbors, chargeSite):
     holePosition = [0, 0, 0]
     for i in range(3):
         holePosition[i] = chargeSite.coords[i] + normalVec[i]*shift
-    print()
-    print(chargeSite)
-    print(holePosition)
     tmpcell = unitcell.copy()
     tmpcell.append('He', holePosition, coords_are_cartesian=True)
     return tmpcell.sites[-1].frac_coords

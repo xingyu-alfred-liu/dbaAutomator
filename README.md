@@ -44,7 +44,7 @@ In case you are not familiar with `pymatgen`, here is the [link](https://pymatge
 
 ### Guide the procedure of DBA
 
-#### Step 1: Find the single molecule
+#### Define an automator object
 Import `dbaAutomator.core.automator` and `os`  
 
     >>> import os
@@ -79,7 +79,17 @@ Define the automator object. The initial setup will lead to creation of necessar
     Now loading the unit cell information...
     Please make sure this is the file you want to load: /Users/alfredliu/tmp/unitcell/in
     Reminder: Please make sure you type the correct fine grid
-Look for the single molecule located in the middle of the constructed supercell. If set `returnmol=True`, `dba.getmol()` will return a `pymatgen.Molecule` object. If set `outputmol=False`, the single molecule file will not be written in the singlemol folder. 
+
+#### Step 1: Find the single molecule
+Look for the single molecule located in the middle of the constructed supercell.  
+
+**Arguments**  
+
+`returnmol=True`  Default: `False`  
+`dba.getmol()` will return a `pymatgen.Molecule` object of this selected molecule.  
+
+`outputmol=True`  Default: `True`  
+The single molecule file will be written in the singlemol folder. 
 
     >>> dba.getmol(returnmol=False, outputmol=True)
     Now finding the central single molecule...
@@ -106,7 +116,9 @@ Look for the single molecule located in the middle of the constructed supercell.
     28335 [  -3.95927738   -6.89532748 -151.71176732] C
     51573 [  -3.37141158   -9.19015407 -152.26717613] C
     45615 [  -5.13834955   -5.99033753 -140.19603869] C
-    ...
+    
+    ......
+    
     47343 [  -5.73454952   -3.745924   -141.00478986] C
     17007 [  -6.44231229   -1.89253381 -141.82349253] H
     4336 [ -10.12117455   -0.6406022  -145.63013462] H
@@ -115,11 +127,68 @@ Look for the single molecule located in the middle of the constructed supercell.
     7623 [  -6.72688503    1.33136346 -160.59428942] H
     14703 [  -5.16135803   -5.60808548 -139.17673664] H
     16239 [  -5.71045515   -3.38168353 -139.97871313] H
-    The single molecule structure is saved as '/TheBestUser/PATH/TO/data/singlemolecule/singleMol.xyz'
+    The single molecule structure is saved under '/TheBestUser/PATH/TO/data/singlemolecule/singleMol.xyz'
 
 #### Step 2: Locate the hole positions
+`dba.getholes()` can locate the hole positions and write the input files for ext wfn calculations under the path:  
+`/TheBestUser/PATH/TO/data/dba`.  
+
+**Arguments**  
+
+`returnholes=True`  Default: `True`  
+
+`dba.getholes()` will return a dictionary, with keys as the hole-placed atom index, and values are the fractional coords of holes with respect to the unit cell. A json file will be written under:  
+`/TheBestUser/PATH/TO/data/supercell/holePositions.json`  
+which contains the hole position information.  
+Notice this file will be loaded in dba calculation, so please keep it as where it is.  
+
+`writeinput=True`   Default: `True`  
+The input files for ext wfn calculations will be generated under:  
+`/TheBestUser/PATH/TO/data/dba`  
+Each folder within this path represents a hole position. Please keep it as default `True`, because these folders will be loaded in dba calculation. 
+
+    >>> dba.getholes(returnholes=False, outputholes=True, writeinput=True)
+    Now locate the hole positions...
+    Loading the output central single molecule...
+    Loading cube and ACF.dat file...
+    Looking for hole positions...
+    The hole positions are output under: /TheBestUser/PATH/TO/data/supercell/holePositions.json
+    The input files for plotxct calculations are written under: /TheBestUser/PATH/TO/data/dba
 
 #### Step 3: Compute charge transfer character
+The last step is using `dba.caldba()` to compute the charge transfer character for each hole position, and the total charge transfer character.  
+
+**Arguments**  
+`writeresult=True`  Default: `True`  
+The charge transfer character inforlation will be output under: `/TheBestUser/PATH/TO/data/supercell`
+
+    >>> dba.caldba(writeresult=False)
+    Now calculate charge transfer character...
+    Loading the output central single molecule...
+    Loading ACF.dat of single molecule HOMO...
+    Loading bader results for each hole positions
+    Checking if holes match with previous settings...
+    
+    Loading ACF.dat at hole index: 66
+    Loading supercell, this process might take minutes, please wait...
+    Charge occupation for hole index 66 is: 0.60 %.
+    
+    ......
+    
+    Loading ACF.dat at hole index: 87
+    Loading supercell, this process might take minutes, please wait...
+    Charge occupation for hole index 87 is: 0.49 %.
+
+    The charge transfer character for each hole positions:
+    66 : 99.40 %
+    
+    ......
+    
+    87 : 99.51 %
+    
+    Computing charge transfer character now...
+    The total charge transfer character is: 99.30 %.
+
 
 ### Check convergence, charge transfer
 

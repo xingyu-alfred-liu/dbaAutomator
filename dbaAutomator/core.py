@@ -9,11 +9,12 @@ from .ref import *
 # 3. calculate DBA according to previous procedures
 class automator(object):
 
-    def __init__(self, path, finegrid, file, chargeThreshold=0.01):
-        self.path = path
+    def __init__(self, datapath, finegrid, filepath=None, chargeThreshold=0.01):
+        self.path = datapath
         # check if there are necessary folders inside data folder
         checkDataFolder(self.path)
-        copyInput(file, self.path)
+        if filepath != None:
+            copyInput(filepath, self.path)
         self.fineGrid = finegrid
         self.bondCutoff = bondCutoff
         self.chargeThreshold = chargeThreshold
@@ -37,7 +38,7 @@ class automator(object):
                 print(key, self.singleMol[key])
             return self.singleMol
 
-    def getholes(self, returnholes=False, outputholes=True, writeinput=True):
+    def getholes(self, returnholes=False, writeinput=True):
         print('Now locate the hole positions...')
         print('Loading the output central single molecule...')
         self.centralmol = loadSingleMol(self.path)
@@ -52,14 +53,13 @@ class automator(object):
             for key in self.holeSites.keys():
                 print(key, ":", self.holeSites[key])
             return self.holeSites
-        if outputholes:
-            print('The hole positions are output under:', os.path.join(self.path, "supercell/holePositions.json"))
-            outputHolePositions(self.holeSites, self.path)
+        print('The hole positions are output under:', os.path.join(self.path, "supercell/holePositions.json"))
+        outputHolePositions(self.holeSites, self.path)
         if writeinput:
             print('The input files for plotxct calculations are written under:', os.path.join(self.path, "dba"))
             createPlotxctInput(self.path, self.holeSites, self.fineGrid)
 
-    def caldba(self):
+    def caldba(self, writeresult=True):
         print('Now calculate charge transfer character...')
         print('Loading the output central single molecule...')
         self.centralmol = loadSingleMol(self.path)
@@ -89,10 +89,12 @@ class automator(object):
             chargematrix = loadChargeMatrix(cubeSuperCell, holepath)
             molIndex = getMoleculeIndex(self.centralmol, cubeSuperCell)
             chargeshare[hole] = getMolShare(chargematrix, molIndex)
-            print('Charge occupation for hole index', hole, 'is:', "{:0.2f}".format(chargeshare[hole]*100), "%.")
+            print('Charge occupation for molecule with hole', hole, 'is:', "{:0.2f}".format(chargeshare[hole]*100), "%.")
+        print()
         print('The charge transfer character for each hole positions:')
         for hole in chargeshare.keys():
             print(hole, ":", "{:0.2f}".format((1-chargeshare[hole])*100), "%")
+        print()
         print('Computing charge transfer character now...')
         self.holeindexlist = np.array(holelist).astype(int)
         tmpcharge = self.smcharge / (np.sum(self.smcharge[self.holeindexlist], axis=0)[4])
@@ -100,7 +102,9 @@ class automator(object):
         for hole in self.holeindexlist:
             chargetransfer += chargeshare[str(hole)] * tmpcharge[hole][4]
         print('The total charge transfer character is:', "{:0.2f}".format((1-chargetransfer)*100), "%.")
-
+        # at last, decide if want to write the result into a file
+        if writeresult:
+            writedbaResult(self.path, chargeshare, chargetransfer)
 
 # checker is a supporting class, it can check the convergence for plotxct calculation
 # it can also calculate CT character for individual folders
