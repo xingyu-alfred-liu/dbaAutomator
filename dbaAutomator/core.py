@@ -9,7 +9,7 @@ from .ref import *
 # 3. calculate DBA according to previous procedures
 class automator(object):
 
-    def __init__(self, datapath, finegrid, filepath=None, chargeThreshold=0.01):
+    def __init__(self, datapath, finegrid, filepath=None):
         self.path = datapath
         # check if there are necessary folders inside data folder
         checkDataFolder(self.path)
@@ -17,7 +17,6 @@ class automator(object):
             copyInput(filepath, self.path)
         self.fineGrid = finegrid
         self.bondCutoff = bondCutoff
-        self.chargeThreshold = chargeThreshold
         print('Now loading the unit cell information...')
         self.unitcell = loadUnitCell(self.path)
         tmpunitcell = self.unitcell.copy()
@@ -38,7 +37,9 @@ class automator(object):
                 print(key, self.singleMol[key])
             return self.singleMol
 
-    def getholes(self, returnholes=False, writeinput=True):
+    def getholes(self, returnholes=False, writeinput=True, chargeThreshold=0.01):
+        self.chargeThreshold = chargeThreshold
+        print('The charge threshold you chose for choosing the hole-placed site is:', "{:0.2f}".format(self.chargeThreshold), "%.")
         print('Now locate the hole positions...')
         print('Loading the output central single molecule...')
         self.centralmol = loadSingleMol(self.path)
@@ -147,8 +148,8 @@ class checker(object):
             printChargeShare(chargedira, chargedirb, chargedirc, convThreshold)
             os.chdir('../')
     
-    def calct(self, file):
-        self.unitcell = loadUnitCell(file)
+    def calct(self, filepath):
+        self.unitcell = loadUnitCell(filepath)
         self.bondDict = getBondDict(self.unitcell, bondCutoff)
         for name in self.checklist:
             os.chdir(name)

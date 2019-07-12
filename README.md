@@ -37,7 +37,7 @@ In case you are not familiar with `pymatgen`, here is the [link](https://pymatge
 `python setup.py install`  
 `cd ..`  
   
-**You are ready to take off.**
+**You are ready to take off ;)**
 
 ## Tutorial
 
@@ -49,12 +49,15 @@ Import `dbaAutomator.core.automator` and `os`
     >>> import os
     >>> from dbaAutomator.core import automator
 
-Define `datapath, finegrid, filepath`  
+*__class__* `automator(datapath, finegrid, filepath=None, chargeThreshold=0.01)`  
+Description: guide the dba process.
+
+**Parameters**  
 
 `datapath`: **_string_**  
 The absolute path where you want to put your data in. We suggest every users create a new directory, such as:  
 
-    >>> os.mkdir data
+    >>> os.mkdir('data')
     >>> os.chdir('data')
     >>> os.path.abspath('.')
     '/TheBestUser/PATH/TO/data'
@@ -64,10 +67,12 @@ The fine grid defined in mean-field calculation to obtain the fine grid wavefunc
 
     >>> finegrid = [a, b, c]
 `filepath`: **_string_**  
-The absolute path to the input file which defines the unit cell. Here we use the `in` of Quantum ESPRESSO as an example.
+Defulat: `None`  
+The absolute path to the input file which defines the unit cell. Here we use the `in` of Quantum ESPRESSO as an example. If not set, input will be only searched under `datapath`.
 
     >>> filepath = '/TheBestUser/PATH/TO/in'
-Define the automator object. The initial setup will lead to creation of necessary directories, duplication of input file to directory `unitcell`, and construction of supercell. 
+  
+Now one can define the automator object. The initial setup will lead to creation of necessary directories, duplication of input file to directory `unitcell`, and construction of supercell. 
 
     >>>> dba = automator(path=datadir, finegrid=finegrid, file=filepath)
     Directory dba created.
@@ -80,14 +85,17 @@ Define the automator object. The initial setup will lead to creation of necessar
     Reminder: Please make sure you type the correct fine grid
 
 #### Step 1: Find the single molecule
-Look for the single molecule located in the middle of the constructed supercell.  
 
-**Arguments**  
+*__function__* `getmol(returnmol=False, outputmol=True)`  
+Description: select the single molecule in the middle of the constructed supercell.
 
-`returnmol=True`  Default: `False`  
-`dba.getmol()` will return a `pymatgen.Molecule` object of this selected molecule.  
+**Parameters**  
+`returnmol`: **_bool_**  
+Default: `False`  
+Return a `pymatgen.Molecule` object of this selected molecule.  
 
-`outputmol=True`  Default: `True`  
+`outputmol`: **_bool_**  
+Default: `True`  
 The single molecule file will be written in the singlemol folder. 
 
     >>> dba.getmol(returnmol=False, outputmol=True)
@@ -97,15 +105,7 @@ The single molecule file will be written in the singlemol folder.
     Number of atoms found in this molecule: 1
     Number of atoms found in this molecule: 2
     Number of atoms found in this molecule: 4
-    Number of atoms found in this molecule: 8
-    Number of atoms found in this molecule: 13
-    Number of atoms found in this molecule: 18
-    Number of atoms found in this molecule: 25
-    Number of atoms found in this molecule: 32
-    Number of atoms found in this molecule: 40
-    Number of atoms found in this molecule: 54
-    Number of atoms found in this molecule: 75
-    Number of atoms found in this molecule: 101
+    ......
     Number of atoms found in this molecule: 122
     Number of atoms found in this molecule: 133
     Number of atoms found in this molecule: 136
@@ -113,40 +113,36 @@ The single molecule file will be written in the singlemol folder.
     6831 [  -5.38261049   -8.45632748 -152.19234847] H
     34479 [  -4.33330991   -8.20105926 -152.05995518] C
     28335 [  -3.95927738   -6.89532748 -151.71176732] C
-    51573 [  -3.37141158   -9.19015407 -152.26717613] C
-    45615 [  -5.13834955   -5.99033753 -140.19603869] C
-    
     ......
-    
-    47343 [  -5.73454952   -3.745924   -141.00478986] C
-    17007 [  -6.44231229   -1.89253381 -141.82349253] H
-    4336 [ -10.12117455   -0.6406022  -145.63013462] H
-    19503 [  -4.48778153   -9.85853304 -141.15639721] H
-    18927 [  -4.80246479   -8.01226689 -139.60897644] H
     7623 [  -6.72688503    1.33136346 -160.59428942] H
     14703 [  -5.16135803   -5.60808548 -139.17673664] H
     16239 [  -5.71045515   -3.38168353 -139.97871313] H
     The single molecule structure is saved under '/TheBestUser/PATH/TO/data/singlemolecule/singleMol.xyz'
 
 #### Step 2: Locate the hole positions
-`dba.getholes()` can locate the hole positions and write the input files for ext wfn calculations under the path:  
-`/TheBestUser/PATH/TO/data/dba`.  
 
-**Arguments**  
+*__function__* `getholes(returnholes=False, writeinput=True, chargeThreshold=0.01)`  
+Description: locate the hole positions and write the input files for ext wfn calculations and write the hole positions into a json file. 
 
-`returnholes=True`  Default: `True`  
+**Parameters**  
 
-`dba.getholes()` will return a dictionary, with keys as the hole-placed atom index, and values are the fractional coords of holes with respect to the unit cell. A json file will be written under:  
-`/TheBestUser/PATH/TO/data/supercell/holePositions.json`  
-which contains the hole position information.  
-Notice this file will be loaded in dba calculation, so please keep it as where it is.  
+`returnholes`: **_bool_**  
+Default: `True`  
+Decide if return a dictionary, with keys as the hole-placed atom index, and values are the fractional coords of holes with respect to the unit cell.  
+**Notice**: this file will be loaded in dba calculation, so please keep it as where it is.  
 
-`writeinput=True`   Default: `True`  
+`writeinput`: **_bool_**  
+Default: `True`  
 The input files for ext wfn calculations will be generated under:  
 `/TheBestUser/PATH/TO/data/dba`  
-Each folder within this path represents a hole position. Please keep it as default `True`, because these folders will be loaded in dba calculation. 
+Each folder within this path represents a hole position.  
+**Notice**: Please keep it as default `True`, because these folders will be loaded in dba calculation. 
 
-    >>> dba.getholes(returnholes=False, outputholes=True, writeinput=True)
+`chargeThreshold`: **_float_**  
+Default: `0.01`  
+Define the charge threshold of possible hole-placed atom sites. In other words, if one atom occupies charge more than this threshold, it will be considered as possible position to put hole near to. 
+
+    >>> dba.getholes(returnholes=False, writeinput=True)
     Now locate the hole positions...
     Loading the output central single molecule...
     Loading cube and ACF.dat file...
@@ -155,11 +151,14 @@ Each folder within this path represents a hole position. Please keep it as defau
     The input files for plotxct calculations are written under: /TheBestUser/PATH/TO/data/dba
 
 #### Step 3: Compute charge transfer character
-The last step is using `dba.caldba()` to compute the charge transfer character for each hole position, and the total charge transfer character.  
+*__function__* `caldba(writeresult=True)`  
+Description: compute the charge transfer character for each hole position, and the total charge transfer character.  
 
-**Arguments**  
-`writeresult=True`  Default: `True`  
-The charge transfer character inforlation will be output under: `/TheBestUser/PATH/TO/data/supercell`
+**Parameters**  
+
+`writeresult`: **_bool_**  
+Default: `True`  
+The charge transfer character information will be output under: `/TheBestUser/PATH/TO/data/supercell`
 
     >>> dba.caldba(writeresult=False)
     Now calculate charge transfer character...
@@ -171,18 +170,14 @@ The charge transfer character inforlation will be output under: `/TheBestUser/PA
     Loading ACF.dat at hole index: 66
     Loading supercell, this process might take minutes, please wait...
     Charge occupation for hole index 66 is: 0.60 %.
-    
     ......
-    
     Loading ACF.dat at hole index: 87
     Loading supercell, this process might take minutes, please wait...
     Charge occupation for hole index 87 is: 0.49 %.
 
     The charge transfer character for each hole positions:
     66 : 99.40 %
-    
     ......
-    
     87 : 99.51 %
     
     Computing charge transfer character now...
@@ -191,11 +186,95 @@ The charge transfer character inforlation will be output under: `/TheBestUser/PA
 
 ### Check convergence, charge transfer
 
+#### Define the checker object
+Import `dbaAutomator.core.checker`  
+
+*__class__* `checker(path)`  
+Description: used to check convergence of ext wfn calculation and calculate charge transfer character for an individual result. 
+
+**Parameters**  
+
+`path`: **_string_**  
+Feed in the path where you want to run checker. Check will run recurrently and find out all folder with `cube` file and corresponding `ACF.dat`, appended as part of a checklist. 
+
+    >>> from dbaAutomator.core import checker
+    >>> checkpath = '/TheBestUser/PATH/TO/data/dba'
+    >>> dbachecker = checker(checkpath)
+
 #### Compute the intermolecular distance
+
+*__function__* `caldist()`  
+Description: load in the cube supercell and find all complete single molecules, and find out the smallest intermolecular distance. 
+
+    >>> dbachecker.caldist()
+    Loading supercell, this process might take minutes, please wait...
+    Looking for the primitive cell...
+    Looking for all fragments within constructed supercell...
+    Reminder: Please make sure you type in the correct fine grid.
+    length of supercell: 2176
+    The site closest to the middle is [  3.99770256  19.97457752 -15.96009805] C
+    The corresponding site index is 450
+    Number of atoms found in this molecule: 1
+    Number of atoms found in this molecule: 4
+    ...
+    Number of atoms found in this molecule: 132
+    Number of atoms found in this molecule: 136
+    length of supercell: 2040
+    The site closest to the middle is [  3.12439252  21.83230651 -18.94876799] H
+    The corresponding site index is 122
+    Number of atoms found in this molecule: 1
+    Number of atoms found in this molecule: 2
+    Number of atoms found in this molecule: 4
+    ...
+    length of supercell: 136
+    The site closest to the middle is [  1.21158426   6.77991156 -26.88168128] H
+    The corresponding site index is 114
+    Number of atoms found in this molecule: 1
+    Number of atoms found in this molecule: 2
+    ...
+    Number of atoms found in this molecule: 134
+    Number of atoms found in this molecule: 136
+    The closest distance between center of masses is: 8.21
 
 #### Check convergence of ext wfn calculation
 
+*__function__* `checkconv(convThreshold=0.05)`  
+Description: load in the cube supercell and find all complete single molecules, and find out the smallest intermolecular distance. 
+
+**Parameters**
+
+`convThreshold `: **_float_**  
+Default: `0.05`
+Define the convergence threshold of charge occupied by edge atoms. 
+
 #### Compute charge transfer for specified conditions
+
+*__function__* `calct(filepath)`  
+Description:  compute the charge transfer character for ext wfn calculation output defined in `check` class. 
+
+**Parameters**
+
+`filepath`: **_string_**  
+Defines the path to the mean field calculation input, which provides the unit cell structure. 
+
+    >>> dbachecker.calct('/TheBestUser/PATH/TO/in')
+    
+    Now calculating charge transfer character in folder: /CHECK/LIST/66
+    Loading supercell, this process might take minutes, please wait...
+    The hole position in the input file is: [3.141523121238201, 2.0205509312877465, 2.934486265836001]
+    The Cartesian coordinates for this hole position is: [15.26745904 42.93751551 46.18576196]
+    The site closest to the middle is [15.75578418 43.25327987 45.63637017] C
+    The corresponding site index is 23626
+    Number of atoms found in this molecule: 1
+    ...
+    Number of atoms found in this molecule: 134
+    Number of atoms found in this molecule: 136
+    The charge transfer character for this hole position is: 99.40 %.
+    
+    Now calculating charge transfer character in folder: /CHECK/LIST/15
+    Loading supercell, this process might take minutes, please wait...
+    ...
+    
 
 ## External Resources:  
   * Cube File explanation: [http://paulbourke.net/dataformats/cube/](http://paulbourke.net/dataformats/cube/)
