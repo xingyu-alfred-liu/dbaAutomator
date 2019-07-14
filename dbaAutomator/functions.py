@@ -53,6 +53,11 @@ def getSingleMol(supercell, middleSite, bondDict, middleSiteIndex):
     return singleMol
 
 def getCentralSingleMol(supercell, bondDict, middle=[0.5, 0.5, 0.5]):
+    # check if the frac_coord is smaller than zero
+    # if smaller than zero, change the middle site coords to negative
+    if min(supercell.frac_coords[:, 0]) < 0:
+        for i, val in enumerate(middle):
+            middle[i] = val * (-1)
     # find site in the middle
     dist = 1
     for i, site in enumerate(supercell.sites):
@@ -260,3 +265,65 @@ def copyInput(file, path):
     unitcellpath = os.path.join(path, 'unitcell')
     print('Copy unitcell file to', unitcellpath, '.')
     copy2(file, unitcellpath)
+
+def getMPC(supercell, finegrid, molslist):
+    # get the number of unitcells used to build the supercell
+    # get the number of atoms per cell
+    supercellsize = finegrid[0] * finegrid[1] * finegrid[2]
+    atomPerCell = len(supercell.sites) / supercellsize
+    if len(molslist) == 0:
+        sys.exit('There is no complete molecules founded in molslist...')
+    else:
+        tmpmol = molslist[0].copy
+    mpc = atomPerCell / len(tmpmol.sites)
+    # check if mpc is an integer
+    if mpc.is_interger():
+        print('The number of molecules per cell is:', int(mpc))
+    else:
+        print('The number of molecules per cell is not an integer, exiting program...')
+    return int(mpc)
+
+def getEdgeFragmentsIndex(supercell, mpc, intermoldist, finegrid, bondDict, adjustment=1.0):
+    indexlist = list()
+    celllist = list()
+    # check in three ranges
+    for i in range(3):
+        # because every time need to delete some sites
+        # so use backup supercell everytime
+        tmpcell = supercell.copy()
+        # fragmentlist is a list of sites, it contains the sites belong to the edge fragments, not index
+        # find out the index later
+        fragmentlist = list()
+        # check the range of the supercell fractional coordinates
+        # if it's from -1 to 0, need to change the cutoff range too
+        if max(supercell.frac_coords[:, 0]) < 0:
+            adjustment = adjustment * (-1)
+        cutoff = intermoldist * adjustment / tmpcell.lattice.abc[i]
+        # decreaselist tells the index for atoms within the cutoff range
+        # search start from these atoms
+        if max(supercell.frac_coords[:, 0]) < 0:
+            decreaselist = np.where(np.logical_or(tmpcell.frac_coords[:, i] > cutoff, tmpcell.frac_coords[:, i] < (-1+cutoff)))[0]
+        else:
+            decreaselist = np.where(np.logical_or(tmpcell.frac_coords[:, i] < cutoff, tmpcell.frac_coords[:, i] > (1-cutoff)))[0]
+        # delete the sites from tmpcell that are part of the edge fragments
+        # the key function is: getCentralSingleMol(supercell, bondDict)
+        # or the key function is: getSingleMol(supercell, middleSite, bondDict, middleSiteIndex)
+        while decreaselist.size != 0:
+            # choose the first site index in the decreaselist as the starting middleSiteIndex
+            # getSingleMol returns a dictionary, key is index, value is site
+            fragment = getSingleMol(tmpcell, tmpcell.sites[decreaselist[0]], bondDict, decreaselist[0])
+            fragmentindex = list()
+            for siteindex in fragment.keys():
+                fragmentlist.append(fragment[siteindex])
+                fragmentindex.append(siteindex)
+            tmpcell.remove_sites(fragmentindex)
+            # now some of the sites are removed from tmpcell, need to recaluclate the decrease list
+            # this list should be continuously decrasing
+            decreaselist = np.where(np.logical_or(tmpcell.frac_coords[:, i] < cutoff, tmpcell.frac_coords[:, i] > (1-cutoff)))[0]
+        # now the fragmentlist is the list full of edge fragment sites
+        cellfragmentindex = list()
+        celllist.append(tmpcell)
+        for site in fragmentlist:
+            cellfragmentindex.append(np.where(supercell.frac_coords == site.coords)[0])
+        indexlist += [cellfragmentindex]
+    return indexlist[0], indexlist[1], indexlist[2], celllist[0], celllist[1], celllist[2]

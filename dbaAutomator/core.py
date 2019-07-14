@@ -112,39 +112,62 @@ class automator(object):
 class checker(object):
 
     # the path has to be the absolute path to where dba runs
-    def __init__(self, path):
+    def __init__(self, path, finegrid):
         self.path = path
+        self.fineGrid = finegrid
         checkList = []
         self.checklist = getXctPath(self.path, checkList)
         if len(self.checklist) == 0:
             raise Exception('Warning!!! No suitable files found in folder:', self.path, "\n")
     
-    def caldist(self):
+    def calprep(self):
         # choose a supercell cell and get the inter molecular distance
         # first get all complete single molecules
-        self.tmpsupercell = loadCubeCell(self.checklist[0])
-        self.bondDict = getBondDict(self.tmpsupercell, bondCutoff)
+        tmpsupercell = loadCubeCell(self.checklist[0])
+        supercell = tmpsupercell.copy()
+        self.bondDict = getBondDict(tmpsupercell, bondCutoff)
         print('Looking for the primitive cell...')
-        self.primitive = getPrimitiveCell(self.tmpsupercell)
+        self.primitive = getPrimitiveCell(tmpsupercell)
         print('Looking for all fragments within constructed supercell...')
         tmpstruct = self.primitive.copy()
         tmpstruct = getSuperCell(tmpstruct, [2, 2, 2])
         self.molslist = getAllMols(tmpstruct, self.bondDict)
-        self.convrange = getInterMolLen(self.molslist)
-        print('The closest distance between center of masses is:', "{:0.2f}".format(self.convrange))
+        self.intermoldist = getInterMolLen(self.molslist)
+        self.mpc = getMPC(supercell, self.fineGrid, self.molslist)
+        print('The closest distance between center of masses is:', "{:0.2f}".format(self.intermoldist))
+
+    # def checkconv(self, convThreshold=0.05):
+    #     print('Checking the convergence for founded exciton wavefunction calculations...')
+    #     for name in self.checklist:
+    #         os.chdir(name)
+    #         print()
+    #         print('Now check folder:', name)
+    #         print('Loading cube file and ACF.dat...')
+    #         tmpcube = loadCubeCell(name)
+    #         chargematrix = loadChargeMatrix(tmpcube, name)
+    #         moldira, moldirb, moldirc = getAtomIndex(tmpcube, self.intermoldist)
+    #         chargedira = getChargeShare(moldira, chargematrix)
+    #         chargedirb = getChargeShare(moldirb, chargematrix)
+    #         chargedirc = getChargeShare(moldirc, chargematrix)
+    #         printChargeShare(chargedira, chargedirb, chargedirc, convThreshold)
+    #         os.chdir('../')
 
     def checkconv(self, convThreshold=0.05):
+        print('Checking the convergence for founded exciton wavefunction calculations...')
+        print('Loading cube file...')
+        # need to get the index for the cube file edge fragments
+        supercell = loadCubeCell(os.path.join(self.checklist[0]))
+        print('Now getting the index for edge fragments')
+        edgeAindex, edgeBindex, edgeCindex, self.rcellA, self.rcellB, self.rcellC = getEdgeFragmentsIndex(supercell, self.mpc, self.intermoldist, self.bondDict, self.fineGrid)
         for name in self.checklist:
             os.chdir(name)
             print()
             print('Now check folder:', name)
-            print('Loading cube file and ACF.dat...')
-            tmpcube = loadCubeCell(name)
-            chargematrix = loadChargeMatrix(tmpcube, name)
-            moldira, moldirb, moldirc = getAtomIndex(tmpcube, self.convrange)
-            chargedira = getChargeShare(moldira, chargematrix)
-            chargedirb = getChargeShare(moldirb, chargematrix)
-            chargedirc = getChargeShare(moldirc, chargematrix)
+            print('Loading ACF.dat...')
+            chargematrix = loadChargeMatrix(supercell, name)
+            chargedira = getChargeShare(edgeAindex, chargematrix)
+            chargedirb = getChargeShare(edgeBindex, chargematrix)
+            chargedirc = getChargeShare(edgeCindex, chargematrix)
             printChargeShare(chargedira, chargedirb, chargedirc, convThreshold)
             os.chdir('../')
     
