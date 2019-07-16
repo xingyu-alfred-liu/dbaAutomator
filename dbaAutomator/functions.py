@@ -330,6 +330,7 @@ def getEdgeFragmentsIndex(supercell, mpc, intermoldist, finegrid, bondDict, adju
         # xyzobj.write_file(filename='/Users/alfredliu/Downloads/tmpcell_'+str(i)+'.xyz')
         while decreaselist.size != 0:
             print('length of decreaselist:', len(decreaselist))
+            print('The length of supercell:', len(tmpcell.sites))
             # choose the first site index in the decreaselist as the starting middleSiteIndex
             # getSingleMol returns a dictionary, key is index, value is site
             fragment = getSingleMol(tmpcell, tmpcell.sites[decreaselist[0]], bondDict, decreaselist[0])

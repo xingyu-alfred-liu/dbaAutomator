@@ -160,8 +160,8 @@ class checker(object):
         print('This is the test function, getting all fragments')
         self.supermolslist = getAllMols(tmpstruct, self.bondDict)
         print('Getting the index for edge fragments')
-        self.edgeAindex, self.edgeBindex, self.edgeCindex = getEdgeIndex(self.supermolslist, supercell, self.intermoldist)
-        # edgeAindex, edgeBindex, edgeCindex, self.rcellA, self.rcellB, self.rcellC = getEdgeFragmentsIndex(supercell, self.mpc, self.intermoldist, self.fineGrid, self.bondDict)
+        # self.edgeAindex, self.edgeBindex, self.edgeCindex = getEdgeIndex(self.supermolslist, supercell, self.intermoldist)
+        self.edgeAindex, self.edgeBindex, self.edgeCindex, self.rcellA, self.rcellB, self.rcellC = getEdgeFragmentsIndex(supercell, self.mpc, self.intermoldist, self.fineGrid, self.bondDict)
         for name in self.checklist:
             os.chdir(name)
             print()
