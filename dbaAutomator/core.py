@@ -154,20 +154,23 @@ class checker(object):
 
     def checkconv(self, convThreshold=0.05):
         print('Checking the convergence for founded exciton wavefunction calculations...')
-        print('Loading cube file...')
         # need to get the index for the cube file edge fragments
         supercell = loadCubeCell(os.path.join(self.checklist[0]))
-        print('Now getting the index for edge fragments')
-        edgeAindex, edgeBindex, edgeCindex, self.rcellA, self.rcellB, self.rcellC = getEdgeFragmentsIndex(supercell, self.mpc, self.intermoldist, self.bondDict, self.fineGrid)
+        tmpstruct = supercell.copy()
+        print('This is the test function, getting all fragments')
+        self.supermolslist = getAllMols(tmpstruct, self.bondDict)
+        print('Getting the index for edge fragments')
+        self.edgeAindex, self.edgeBindex, self.edgeCindex = getEdgeIndex(self.supermolslist, supercell, self.intermoldist)
+        # edgeAindex, edgeBindex, edgeCindex, self.rcellA, self.rcellB, self.rcellC = getEdgeFragmentsIndex(supercell, self.mpc, self.intermoldist, self.fineGrid, self.bondDict)
         for name in self.checklist:
             os.chdir(name)
             print()
             print('Now check folder:', name)
             print('Loading ACF.dat...')
             chargematrix = loadChargeMatrix(supercell, name)
-            chargedira = getChargeShare(edgeAindex, chargematrix)
-            chargedirb = getChargeShare(edgeBindex, chargematrix)
-            chargedirc = getChargeShare(edgeCindex, chargematrix)
+            chargedira = getChargeShare(self.edgeAindex, chargematrix)
+            chargedirb = getChargeShare(self.edgeBindex, chargematrix)
+            chargedirc = getChargeShare(self.edgeCindex, chargematrix)
             printChargeShare(chargedira, chargedirb, chargedirc, convThreshold)
             os.chdir('../')
     

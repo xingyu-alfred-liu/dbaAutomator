@@ -6,6 +6,7 @@ FC = ifort
 FFLAGS = -O2 -CB
 
 LINK = -static
+DLINK = -dynamic -fPIC
 
 OBJS = kind_mod.o       \
        matrix_mod.o     \
