@@ -2,6 +2,7 @@ import os
 from setuptools import setup, find_packages
 
 os.chdir('dbaAutomator/bader')
+os.system('make clean')
 os.system('make bader')
 os.chdir('../../')
 
