@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 os.chdir('dbaAutomator/bader')
 os.system('make bader')
-os.chdir('../')
+os.chdir('../../')
 
 with open('README.md', 'r') as fh:
     long_description = fh.read()
