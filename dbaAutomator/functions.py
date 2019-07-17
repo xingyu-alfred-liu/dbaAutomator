@@ -310,26 +310,8 @@ def getEdgeFragmentsIndex(supercell, mpc, intermoldist, finegrid, bondDict, adju
         # delete the sites from tmpcell that are part of the edge fragments
         # the key function is: getCentralSingleMol(supercell, bondDict)
         # or the key function is: getSingleMol(supercell, middleSite, bondDict, middleSiteIndex)
-        # for j in range(3):
-        #     print('length of decreaselist:', len(decreaselist))
-        #     # choose the first site index in the decreaselist as the starting middleSiteIndex
-        #     # getSingleMol returns a dictionary, key is index, value is site
-        #     fragment = getSingleMol(tmpcell, tmpcell.sites[decreaselist[0]], bondDict, decreaselist[0])
-        #     fragmentindex = list()
-        #     for siteindex in fragment.keys():
-        #         fragmentlist.append(fragment[siteindex])
-        #         fragmentindex.append(siteindex)
-        #     tmpcell.remove_sites(fragmentindex)
-        #     # now some of the sites are removed from tmpcell, need to recaluclate the decrease list
-        #     # this list should be continuously decrasing
-        #     if max(supercell.frac_coords[:, 0]) < 0:
-        #         decreaselist = np.where(np.logical_or(tmpcell.frac_coords[:, i] > cutoff, tmpcell.frac_coords[:, i] < (-1+cutoff)))[0]
-        #     else:
-        #         decreaselist = np.where(np.logical_or(tmpcell.frac_coords[:, i] < cutoff, tmpcell.frac_coords[:, i] > (1-cutoff)))[0]
-        #     xyzobj = XYZ(tmpcell)
-        # xyzobj.write_file(filename='/Users/alfredliu/Downloads/tmpcell_'+str(i)+'.xyz')
         while decreaselist.size != 0:
-            print('length of decreaselist:', len(decreaselist))
+            print('length of residual edge sites:', len(decreaselist))
             print('The length of supercell:', len(tmpcell.sites))
             # choose the first site index in the decreaselist as the starting middleSiteIndex
             # getSingleMol returns a dictionary, key is index, value is site
@@ -346,12 +328,12 @@ def getEdgeFragmentsIndex(supercell, mpc, intermoldist, finegrid, bondDict, adju
             else:
                 decreaselist = np.where(np.logical_or(tmpcell.frac_coords[:, i] < cutoff, tmpcell.frac_coords[:, i] > (1-cutoff)))[0]
         # now the fragmentlist is the list full of edge fragment sites
-        cellfragmentindex = list()
+        cellfragmentindex = np.array([])
         celllist.append(tmpcell)
         print('Searching for edge fragment site index...')
         for site in fragmentlist:
-            cellfragmentindex.append(np.where(supercell.frac_coords == site.frac_coords)[0])
-        indexlist += [cellfragmentindex]
+            cellfragmentindex = np.append(cellfragmentindex, np.where(supercell.frac_coords == site.frac_coords)[0])
+        indexlist.append(cellfragmentindex)
     return indexlist[0], indexlist[1], indexlist[2], celllist[0], celllist[1], celllist[2]
 
 # test a new function, should be faster
