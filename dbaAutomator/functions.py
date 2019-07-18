@@ -320,6 +320,8 @@ def getEdgeFragmentsIndex(supercell, mpc, intermoldist, finegrid, bondDict, adju
             for siteindex in fragment.keys():
                 fragmentlist.append(fragment[siteindex])
                 fragmentindex.append(siteindex)
+            # to delete the repeated sites
+            fragmentlist = list(set(fragmentlist))
             tmpcell.remove_sites(fragmentindex)
             # now some of the sites are removed from tmpcell, need to recaluclate the decrease list
             # this list should be continuously decrasing
@@ -327,7 +329,16 @@ def getEdgeFragmentsIndex(supercell, mpc, intermoldist, finegrid, bondDict, adju
                 decreaselist = np.where(np.logical_or(tmpcell.frac_coords[:, i] > cutoff, tmpcell.frac_coords[:, i] < (-1+cutoff)))[0]
             else:
                 decreaselist = np.where(np.logical_or(tmpcell.frac_coords[:, i] < cutoff, tmpcell.frac_coords[:, i] > (1-cutoff)))[0]
+            # delete the site index in decreaselist if it already exists in the fragmentlist
+            dellist = list()
+            for i, siteindex in enumerate(decreaselist):
+                if tmpcell.sites[siteindex] in fragmentlist:
+                    dellist.append(i)
+            decreaselist = np.delete(decreaselist, dellist)
         # now the fragmentlist is the list full of edge fragment sites
+        print('for testing purpose...')
+        print('length of fragmentlist:', len(fragmentlist))
+        print('length of tmpcell:', len(tmpcell.sites))
         cellfragmentindex = np.array([])
         celllist.append(tmpcell)
         print('Searching for edge fragment site index...')

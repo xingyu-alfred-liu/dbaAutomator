@@ -19,7 +19,7 @@ dbaAutomator automates double-bader analysis (DBA). It interfaces with exciton w
 ### Install from source
 
 #### Clone the repository
-`git clone https://github.com/BLABABA/dbaAutomator.git`
+`git clone https://github.com/BLABABA/dbaAutomator.git`  
 `cd dbaAutomator`
 
 #### Install requirements
