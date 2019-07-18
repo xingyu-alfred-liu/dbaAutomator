@@ -289,7 +289,7 @@ def getEdgeFragmentsIndex(supercell, mpc, intermoldist, finegrid, bondDict, adju
     indexlist = list()
     celllist = list()
     # check in three ranges
-    for i in range(3):
+    for i in range(1):
         # testing, fix i as the third dimension
         # i = 2
         # because every time need to delete some sites
@@ -348,7 +348,6 @@ def getEdgeFragmentsIndex(supercell, mpc, intermoldist, finegrid, bondDict, adju
         print('Searching for edge fragment site index...')
         for site in fragmentlist:
             cellfragmentindex = np.append(cellfragmentindex, np.where(supercell.frac_coords == site.frac_coords)[0])
-        cellfragmentindex = cellfragmentindex.astype(int).tolist()
         indexlist.append(cellfragmentindex)
     return indexlist[0], indexlist[1], indexlist[2], celllist[0], celllist[1], celllist[2]
 

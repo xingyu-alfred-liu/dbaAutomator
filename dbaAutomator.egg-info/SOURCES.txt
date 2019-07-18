@@ -1,0 +1,12 @@
+README.md
+setup.py
+dbaAutomator/__init__.py
+dbaAutomator/core.py
+dbaAutomator/functions.py
+dbaAutomator/ref.py
+dbaAutomator/structio.py
+dbaAutomator.egg-info/PKG-INFO
+dbaAutomator.egg-info/SOURCES.txt
+dbaAutomator.egg-info/dependency_links.txt
+dbaAutomator.egg-info/requires.txt
+dbaAutomator.egg-info/top_level.txt

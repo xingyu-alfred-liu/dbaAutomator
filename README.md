@@ -280,25 +280,6 @@ Defines the path to the mean field calculation input, which provides the unit ce
   * Cube File explanation: [http://paulbourke.net/dataformats/cube/](http://paulbourke.net/dataformats/cube/)
   * Bader Charge Analysis: [http://theory.cm.utexas.edu/henkelman/code/bader](http://theory.cm.utexas.edu/henkelman/code/bader)
 
-
-How it works:
-    This program works in several steps:
-    1. get middle single molecule of the constructed supercell, we will select
-    hole positions according to this middle single molecule
-    2. after you get the single molecule structure, please calculate the HOMO
-    and put the .cube file inside /data/singlemolecule
-    3. according to this singlemolecule HOMO, we will decide the Cartesian coordinates of holes and output the exciton wavefunction input file for BerkeleyGW
-    4. after you run all the exciton wavefunction calculations, we will collect
-    all charge files and run dba over and output the final charge transfer character
-
-Functionality:  
-    - find hole positions with HOMO cube file  
-    - generate input file, which is define excition wfn calculation input file  
-    - automate bader analysis over exciton wfn result and collect CT percentage  
-    - check the convergence of exciton wfn calculation based on the output cube file and bader analysis
-
-Reminder:
-    - DO NOT rerun single molecule selection after you get the HOMO,
-    because the order of this single molecule might change
-    - Do rerun single molecule selection if you decide to change the
-    supercell size
+## Notes:
+DO NOT rerun single molecule selection after you get the HOMO, because the order of this single molecule might change.  
+Do rerun single molecule selection if you decide to change the supercell size.
