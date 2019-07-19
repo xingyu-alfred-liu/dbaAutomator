@@ -406,3 +406,21 @@ def getEdgeIndex(supermolslist, supercell, intermoldist, adjustment=1.0):
                     break
         edgeindex.append(tmpindex)
     return edgeindex[0], edgeindex[1], edgeindex[2]
+
+def getMoleculeLength(molslist):
+    # make sure this list is not empty
+    if len(molslist) == 0:
+        raise Exception('The number of molecules in molslist is zero, \
+            please check make sure your structure is correct')
+    else:
+        tmpmol = molslist[0].copy()
+    # get the longest distance within one molecule
+    dist = 0
+    for i, sitex in enumerate(tmpmol.sites):
+        for j, sitey in enumerate(tmpmol.sites):
+            if i < j:
+                tmpdist = np.linalg.norm(sitex.coords-sitey.coords)
+                if tmpdist > dist:
+                    dist = tmpdist
+    # thus give the longest distance within one molecule
+    return dist

@@ -133,6 +133,8 @@ class checker(object):
         tmpstruct = getSuperCell(tmpstruct, [2, 2, 2])
         self.molslist = getAllMols(tmpstruct, self.bondDict)
         self.intermoldist = getInterMolLen(self.molslist)
+        self.mollen = getMoleculeLength(self.molslist)
+        print('The longest distance in one molecule is:', "{:0.2f}".format(self.mollen))
         self.mpc = getMPC(supercell, self.fineGrid, self.molslist)
         print('The closest distance between center of masses is:', "{:0.2f}".format(self.intermoldist))
 
