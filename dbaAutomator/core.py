@@ -120,7 +120,7 @@ class checker(object):
         if len(self.checklist) == 0:
             raise Exception('Warning!!! No suitable files found in folder:', self.path, "\n")
     
-    def calprep(self):
+    def prep(self):
         # choose a supercell cell and get the inter molecular distance
         # first get all complete single molecules
         tmpsupercell = loadCubeCell(self.checklist[0])
@@ -163,7 +163,7 @@ class checker(object):
         print('Getting the index for edge fragments')
         #self.edgeAindex, self.edgeBindex, self.edgeCindex = getEdgeIndex(self.supermolslist, supercell, self.intermoldist)
         self.edgeAindex, self.edgeBindex, self.edgeCindex, self.rcellA, self.rcellB, self.rcellC = \
-            getEdgeFragmentsIndex(supercell, self.mpc, self.intermoldist, self.fineGrid, self.bondDict)
+            getEdgeFragmentsIndexDel(supercell, self.mollen, self.intermoldist, self.fineGrid, self.bondDict)
         for name in self.checklist:
             os.chdir(name)
             print()
