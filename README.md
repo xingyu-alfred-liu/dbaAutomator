@@ -203,10 +203,10 @@ Feed in the path where you want to run checker. Check will run recurrently and f
 
 #### Compute the intermolecular distance
 
-*__function__* `caldist()`  
+*__function__* `prep()`  
 Description: load in the cube supercell and find all complete single molecules, and find out the smallest intermolecular distance. 
 
-    >>> dbachecker.caldist()
+    >>> dbachecker.prep()
     Loading supercell, this process might take minutes, please wait...
     Looking for the primitive cell...
     Looking for all fragments within constructed supercell...

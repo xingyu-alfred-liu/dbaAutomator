@@ -138,22 +138,6 @@ class checker(object):
         self.mpc = getMPC(supercell, self.fineGrid, self.molslist)
         print('The closest distance between center of masses is:', "{:0.2f}".format(self.intermoldist))
 
-    # def checkconv(self, convThreshold=0.05):
-    #     print('Checking the convergence for founded exciton wavefunction calculations...')
-    #     for name in self.checklist:
-    #         os.chdir(name)
-    #         print()
-    #         print('Now check folder:', name)
-    #         print('Loading cube file and ACF.dat...')
-    #         tmpcube = loadCubeCell(name)
-    #         chargematrix = loadChargeMatrix(tmpcube, name)
-    #         moldira, moldirb, moldirc = getAtomIndex(tmpcube, self.intermoldist)
-    #         chargedira = getChargeShare(moldira, chargematrix)
-    #         chargedirb = getChargeShare(moldirb, chargematrix)
-    #         chargedirc = getChargeShare(moldirc, chargematrix)
-    #         printChargeShare(chargedira, chargedirb, chargedirc, convThreshold)
-    #         os.chdir('../')
-
     def checkconv(self, convThreshold=0.05):
         print('Checking the convergence for founded exciton wavefunction calculations...')
         # need to get the index for the cube file edge fragments
@@ -163,7 +147,7 @@ class checker(object):
         print('Getting the index for edge fragments')
         #self.edgeAindex, self.edgeBindex, self.edgeCindex = getEdgeIndex(self.supermolslist, supercell, self.intermoldist)
         self.edgeAindex, self.edgeBindex, self.edgeCindex, self.rcellA, self.rcellB, self.rcellC = \
-            getEdgeFragmentsIndexDel(supercell, self.mollen, self.intermoldist, self.fineGrid, self.bondDict)
+            getEdgeFragmentsIndexNew(supercell, self.mollen, self.intermoldist, self.fineGrid, self.bondDict)
         for name in self.checklist:
             os.chdir(name)
             print()
