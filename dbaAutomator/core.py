@@ -136,7 +136,7 @@ class checker(object):
         self.mollen = getMoleculeLength(self.molslist)
         print('The longest distance in one molecule is:', "{:0.2f}".format(self.mollen))
         self.mpc = getMPC(supercell, self.fineGrid, self.molslist)
-        print('The closest distance between center of masses is:', "{:0.2f}".format(self.intermoldist))
+        print('The closest distance between molecular center of masses is:', "{:0.2f}".format(self.intermoldist))
 
     def checkconv(self, convThreshold=0.05):
         print('Checking the convergence for founded exciton wavefunction calculations...')
@@ -146,19 +146,19 @@ class checker(object):
         #self.supermolslist = getAllMols(tmpstruct, self.bondDict)
         print('Getting the index for edge fragments')
         #self.edgeAindex, self.edgeBindex, self.edgeCindex = getEdgeIndex(self.supermolslist, supercell, self.intermoldist)
-        self.edgeAindex, self.edgeBindex, self.edgeCindex, self.rcellA, self.rcellB, self.rcellC = \
-            getEdgeFragmentsIndexNew(supercell, self.mollen, self.intermoldist, self.fineGrid, self.bondDict)
-        for name in self.checklist:
-            os.chdir(name)
-            print()
-            print('Now check folder:', name)
-            print('Loading ACF.dat...')
-            chargematrix = loadChargeMatrix(supercell, name)
-            chargedira = getChargeShare(self.edgeAindex, chargematrix)
-            chargedirb = getChargeShare(self.edgeBindex, chargematrix)
-            chargedirc = getChargeShare(self.edgeCindex, chargematrix)
-            printChargeShare(chargedira, chargedirb, chargedirc, convThreshold)
-            os.chdir('../')
+        self.edgeAindex, self.edgeBindex, self.edgeCindex = getEdgeFragmentsIndex(supercell, self.mollen, \
+                                                                self.intermoldist, self.fineGrid, self.bondDict)
+        # for name in self.checklist:
+        #     os.chdir(name)
+        #     print()
+        #     print('Now check folder:', name)
+        #     print('Loading ACF.dat...')
+        #     chargematrix = loadChargeMatrix(supercell, name)
+        #     chargedira = getChargeShare(self.edgeAindex, chargematrix)
+        #     chargedirb = getChargeShare(self.edgeBindex, chargematrix)
+        #     chargedirc = getChargeShare(self.edgeCindex, chargematrix)
+        #     printChargeShare(chargedira, chargedirb, chargedirc, convThreshold)
+        #     os.chdir('../')
     
     def calct(self, filepath):
         self.unitcell = loadUnitCell(filepath)

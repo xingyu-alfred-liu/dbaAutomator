@@ -284,10 +284,9 @@ def getMPC(supercell, finegrid, molslist):
         print('The number of molecules per cell is not an integer, exiting program...')
     return int(mpc)
 
-def getEdgeFragmentsIndexNew(supercell, mollen, intermoldist, finegrid, bondDict, adjustment=1.0):
+def getEdgeFragmentsIndex(supercell, mollen, intermoldist, finegrid, bondDict, adjustment=1.0):
     print('Looking for the edge fragments index, might take up to an hour...')
     indexlist = list()
-    celllist = list()
     # decide if cutoff need a different sign
     if max(supercell.frac_coords[:, 0]) < 0:
         sign = -1
@@ -295,124 +294,45 @@ def getEdgeFragmentsIndexNew(supercell, mollen, intermoldist, finegrid, bondDict
         sign = 1
     # check in three ranges
     for i in range(3):
-        # so use backup supercell everytime
-        tmpcell = supercell.copy()
-        cutoff = intermoldist * adjustment * sign / tmpcell.lattice.abc[i]
+        cutoff = intermoldist * adjustment * sign / supercell.lattice.abc[i]
         print('The cutoff is:', cutoff)
-        # chop off the middle of the supercell, up until cutoff + mol length
-        chopcutoff = (intermoldist * adjustment + mollen) * sign / tmpcell.lattice.abc[i]
-        print('The chopcutoff is:', chopcutoff)
-        # make sure this chopcutoff does not pass the middle
-        # if the chopcutoff pass the middle, then do not chop the middle off
-        if abs(chopcutoff) < 0.5:
-            if sign < 0:
-                chopindex = np.where(np.logical_and(tmpcell.frac_coords[:, i] < chopcutoff, tmpcell.frac_coords[:, i] > (-1-chopcutoff)))[0]
-            else:
-                chopindex = np.where(np.logical_and(tmpcell.frac_coords[:, i] > chopcutoff, tmpcell.frac_coords[:, i] < (1-chopcutoff)))[0]
-            tmpcell.remove_sites[chopindex]
+        # # chop off the middle of the supercell, up until cutoff + mol length
+        # chopcutoff = (intermoldist * adjustment + mollen) * sign / tmpcell.lattice.abc[i]
+        # print('The chopcutoff is:', chopcutoff)
+        # # make sure this chopcutoff does not pass the middle
+        # # if the chopcutoff pass the middle, then do not chop the middle off
+        # if abs(chopcutoff) < 0.5:
+        #     if sign < 0:
+        #         chopindex = np.where(np.logical_and(tmpcell.frac_coords[:, i] < chopcutoff, tmpcell.frac_coords[:, i] > (-1-chopcutoff)))[0]
+        #     else:
+        #         chopindex = np.where(np.logical_and(tmpcell.frac_coords[:, i] > chopcutoff, tmpcell.frac_coords[:, i] < (1-chopcutoff)))[0]
+        #     tmpcell.remove_sites(chopindex)
         # decreaselist tells the index for atoms within the cutoff range
         # search start from these atoms
         if sign < 0:
-            decreaselist = np.where(np.logical_or(tmpcell.frac_coords[:, i] > cutoff, tmpcell.frac_coords[:, i] < (-1-cutoff)))[0]
+            decreaselist = np.where(np.logical_or(supercell.frac_coords[:, i] > cutoff, supercell.frac_coords[:, i] < (-1-cutoff)))[0]
         else:
-            decreaselist = np.where(np.logical_or(tmpcell.frac_coords[:, i] < cutoff, tmpcell.frac_coords[:, i] > (1-cutoff)))[0]
+            decreaselist = np.where(np.logical_or(supercell.frac_coords[:, i] < cutoff, supercell.frac_coords[:, i] > (1-cutoff)))[0]
         print('The length of decreaselist is:', len(decreaselist))
         # edgelist is a list of sites, it contains the sites belong to the edge fragments, not index
         # find out the index later
-        edgesite = list()
+        edgeindex = list()
         # key function is: getSingleMol(supercell, middleSite, bondDict, middleSiteIndex)
-        for cutoffindex in decreaselist:
+        for cutindex in decreaselist:
             # if this index in the decreaselist is already in the cutoffindex
             # then don't waste time to find out the fragment for it
-            if tmpcell.sites[cutoffindex] in edgesite:
+            if cutindex in edgeindex:
                 pass
             else:
                 # choose the first site index in the decreaselist as the starting middleSiteIndex
                 # getSingleMol returns a dictionary, key is index, value is site
-                fragment = getSingleMol(tmpcell, tmpcell.sites[cutoffindex], bondDict, cutoffindex)
-                for siteindex in fragment.keys():
-                    edgesite.append(fragment[siteindex])
-            print('The length of edgeindexlist is:', len(edgesite))
-        # now the fragmentlist is the list full of edge fragment sites
-        edgeindex = list()
-        for i, site in enumerate(supercell.sites):
-            if site in edgesite:
-                edgeindex.append(i)
-        # before remove the edge sites, make a copy
-        print('The length of edge index is:' len(edgeindex))
-        tmpcell = supercell.copy()
-        tmpcell.remove_sites(edgeindex)
+                fragment = getSingleMol(supercell, supercell.sites[cutindex], bondDict, cutindex)
+                for key in fragment.keys():
+                    edgeindex.append(key)
+            # before remove the edge sites, make a copy
+            print('The length of edge index is:', len(edgeindex))
         indexlist.append(edgeindex)
-        celllist.append(tmpcell)
-    return indexlist[0], indexlist[1], indexlist[2], celllist[0], celllist[1], celllist[2]
-
-# def getEdgeFragmentsIndex(supercell, mollen, intermoldist, finegrid, bondDict, adjustment=1.0):
-#     print('Looking for the edge fragments index, might take up to an hour...')
-#     indexlist = list()
-#     celllist = list()
-#     # check in three ranges
-#     for i in range(3):
-#         # testing, fix i as the third dimension
-#         # i = 2
-#         # because every time need to delete some sites
-#         # so use backup supercell everytime
-#         tmpcell = supercell.copy()
-#         # fragmentlist is a list of sites, it contains the sites belong to the edge fragments, not index
-#         # find out the index later
-#         fragmentlist = list()
-#         # check the range of the supercell fractional coordinates
-#         # if it's from -1 to 0, need to change the cutoff range too
-#         if max(supercell.frac_coords[:, 0]) < 0:
-#             adjustment = adjustment * (-1)
-#         cutoff = intermoldist * adjustment / tmpcell.lattice.abc[i]
-#         print('The cutoff is:', cutoff)
-#         # decreaselist tells the index for atoms within the cutoff range
-#         # search start from these atoms
-#         if max(supercell.frac_coords[:, 0]) < 0:
-#             decreaselist = np.where(np.logical_or(tmpcell.frac_coords[:, i] > cutoff, tmpcell.frac_coords[:, i] < (-1+cutoff)))[0]
-#         else:
-#             decreaselist = np.where(np.logical_or(tmpcell.frac_coords[:, i] < cutoff, tmpcell.frac_coords[:, i] > (1-cutoff)))[0]
-#         # delete some sites in the middle to make this process easier
-#         # delete the sites from tmpcell that are part of the edge fragments
-#         # the key function is: getCentralSingleMol(supercell, bondDict)
-#         # or the key function is: getSingleMol(supercell, middleSite, bondDict, middleSiteIndex)
-#         while decreaselist.size != 0:
-#             print('length of residual edge sites:', len(decreaselist))
-#             print('The length of supercell:', len(tmpcell.sites))
-#             # choose the first site index in the decreaselist as the starting middleSiteIndex
-#             # getSingleMol returns a dictionary, key is index, value is site
-#             fragment = getSingleMol(tmpcell, tmpcell.sites[decreaselist[0]], bondDict, decreaselist[0])
-#             fragmentindex = list()
-#             for siteindex in fragment.keys():
-#                 fragmentlist.append(fragment[siteindex])
-#                 fragmentindex.append(siteindex)
-#             # to delete the repeated sites
-#             fragmentlist = list(set(fragmentlist))
-#             tmpcell.remove_sites(fragmentindex)
-#             # now some of the sites are removed from tmpcell, need to recaluclate the decrease list
-#             # this list should be continuously decrasing
-#             if max(supercell.frac_coords[:, 0]) < 0:
-#                 decreaselist = np.where(np.logical_or(tmpcell.frac_coords[:, i] > cutoff, tmpcell.frac_coords[:, i] < (-1+cutoff)))[0]
-#             else:
-#                 decreaselist = np.where(np.logical_or(tmpcell.frac_coords[:, i] < cutoff, tmpcell.frac_coords[:, i] > (1-cutoff)))[0]
-#             # delete the site index in decreaselist if it already exists in the fragmentlist
-#             # dellist = list()
-#             # for i, siteindex in enumerate(decreaselist):
-#             #     if tmpcell.sites[siteindex] in fragmentlist:
-#             #         dellist.append(i)
-#             # decreaselist = np.delete(decreaselist, dellist)
-#         # now the fragmentlist is the list full of edge fragment sites
-#         print('for testing purpose...')
-#         print('length of fragmentlist:', len(fragmentlist))
-#         print('length of tmpcell:', len(tmpcell.sites))
-#         cellfragmentindex = np.array([])
-#         celllist.append(tmpcell)
-#         print('Searching for edge fragment site index...')
-#         for site in fragmentlist:
-#             cellfragmentindex = np.append(cellfragmentindex, np.where(supercell.frac_coords == site.frac_coords)[0])
-#         cellfragmentindex = cellfragmentindex.astype(int).tolist()
-#         indexlist.append(cellfragmentindex)
-#     return indexlist[0], indexlist[1], indexlist[2], celllist[0], celllist[1], celllist[2]
+    return indexlist[0], indexlist[1], indexlist[2]
 
 def getMoleculeLength(molslist):
     # make sure this list is not empty
@@ -432,17 +352,11 @@ def getMoleculeLength(molslist):
     # thus give the longest distance within one molecule
     return dist
 
-# def getEdgeFragmentsIndexDel(supercell, mollen, intermoldist, finegrid, bondDict, adjustment=1.0):
+# def getEdgeFragmentsIndexNosearch(supercell, mollen, intermoldist, finegrid, bondDict, adjustment=1.0):
 #     print('Looking for the edge fragments index, might take up to an hour...')
 #     indexlist = list()
 #     celllist = list()
-#     # make a dictionary to preserve the original index
-#     print('Building site-index dictionary...')
-#     celldict = dict()
-#     for i, site in enumerate(supercell.sites):
-#         celldict[site] = i
-#     # make sure check the supercell fractional sign
-#     # if it's necessary to adjust the sign
+#     # decide if cutoff need a different sign
 #     if max(supercell.frac_coords[:, 0]) < 0:
 #         sign = -1
 #     else:
@@ -454,40 +368,26 @@ def getMoleculeLength(molslist):
 #         # fragmentlist is a list of sites, it contains the sites belong to the edge fragments, not index
 #         # find out the index later
 #         edgeindexlist = list()
-#         # check the range of the supercell fractional coordinates
-#         # if it's from -1 to 0, need to change the cutoff range too
-#         adjustment = adjustment * sign
-#         cutoff = intermoldist * adjustment / tmpcell.lattice.abc[i]
+#         cutoff = intermoldist * adjustment * sign / tmpcell.lattice.abc[i]
 #         print('The cutoff is:', cutoff)
-#         # chop off the middle of the supercell, up until cutoff + mol length
-#         chopcutoff = (intermoldist * adjustment + mollen) * sign / tmpcell.lattice.abc[i]
-#         # make sure this chopcutoff does not pass the middle
-#         # if the chopcutoff pass the middle, then do not chop the middle off
-#         if abs(chopcutoff) < 0.5:
-#             if sign < 0:
-#                 chopindex = np.where(np.logical_and(tmpcell.frac_coords[:, i] < chopcutoff, tmpcell.frac_coords[:, i] > (-1-chopcutoff)))[0]
-#             else:
-#                 chopindex = np.where(np.logical_and(tmpcell.frac_coords[:, i] > chopcutoff, tmpcell.frac_coords[:, i] < (1-chopcutoff)))[0]
-#             tmpcell.remove_sites[chopindex]
 #         # decreaselist tells the index for atoms within the cutoff range
+#         # search start from these atoms
 #         if sign < 0:
 #             decreaselist = np.where(np.logical_or(tmpcell.frac_coords[:, i] > cutoff, tmpcell.frac_coords[:, i] < (-1-cutoff)))[0]
 #         else:
 #             decreaselist = np.where(np.logical_or(tmpcell.frac_coords[:, i] < cutoff, tmpcell.frac_coords[:, i] > (1-cutoff)))[0]
 #         print('The length of decreaselist is:', len(decreaselist))
-#         # select fragments from based on the decreaselist
 #         for cutoffindex in decreaselist:
 #             # if this index in the decreaselist is already in the cutoffindex
 #             # then don't waste time to find out the fragment for it
-#             # should extract the correct index from celldict
-#             if celldict[tmpcell.sites[cutoffindex]] in edgeindexlist:
+#             if cutoffindex in edgeindexlist:
 #                 pass
 #             else:
 #                 # choose the first site index in the decreaselist as the starting middleSiteIndex
 #                 # getSingleMol returns a dictionary, key is index, value is site
 #                 fragment = getSingleMol(tmpcell, tmpcell.sites[cutoffindex], bondDict, cutoffindex)
 #                 for siteindex in fragment.keys():
-#                     edgeindexlist.append(int(celldict[tmpcell.sites[siteindex]]))
+#                     edgeindexlist.append(int(siteindex))
 #             print('The length of edgeindexlist is:', len(edgeindexlist))
 #         # now the fragmentlist is the list full of edge fragment sites
 #         tmpcell.remove_sites(edgeindexlist)
@@ -495,10 +395,9 @@ def getMoleculeLength(molslist):
 #         celllist.append(tmpcell)
 #     return indexlist[0], indexlist[1], indexlist[2], celllist[0], celllist[1], celllist[2]
 
-def getEdgeFragmentsIndexNosearch(supercell, mollen, intermoldist, finegrid, bondDict, adjustment=1.0):
+def getEdgeFragmentsIndexDelMiddle(supercell, mollen, intermoldist, finegrid, bondDict, adjustment=1.0):
     print('Looking for the edge fragments index, might take up to an hour...')
     indexlist = list()
-    celllist = list()
     # decide if cutoff need a different sign
     if max(supercell.frac_coords[:, 0]) < 0:
         sign = -1
@@ -506,13 +405,20 @@ def getEdgeFragmentsIndexNosearch(supercell, mollen, intermoldist, finegrid, bon
         sign = 1
     # check in three ranges
     for i in range(3):
-        # so use backup supercell everytime
         tmpcell = supercell.copy()
-        # fragmentlist is a list of sites, it contains the sites belong to the edge fragments, not index
-        # find out the index later
-        edgeindexlist = list()
-        cutoff = intermoldist * adjustment * sign / tmpcell.lattice.abc[i]
+        cutoff = intermoldist * adjustment * sign / supercell.lattice.abc[i]
         print('The cutoff is:', cutoff)
+        # chop off the middle of the supercell, up until cutoff + mol length
+        chopcutoff = (intermoldist * adjustment + tmpcell.lattice.abc[i]) * sign / tmpcell.lattice.abc[i]
+        print('The chopcutoff is:', chopcutoff)
+        # make sure this chopcutoff does not pass the middle
+        # if the chopcutoff pass the middle, then do not chop the middle off
+        if abs(chopcutoff) < 0.5:
+            if sign < 0:
+                chopindex = np.where(np.logical_and(tmpcell.frac_coords[:, i] < chopcutoff, tmpcell.frac_coords[:, i] > (-1-chopcutoff)))[0]
+            else:
+                chopindex = np.where(np.logical_and(tmpcell.frac_coords[:, i] > chopcutoff, tmpcell.frac_coords[:, i] < (1-chopcutoff)))[0]
+            tmpcell.remove_sites(chopindex)
         # decreaselist tells the index for atoms within the cutoff range
         # search start from these atoms
         if sign < 0:
@@ -520,20 +426,26 @@ def getEdgeFragmentsIndexNosearch(supercell, mollen, intermoldist, finegrid, bon
         else:
             decreaselist = np.where(np.logical_or(tmpcell.frac_coords[:, i] < cutoff, tmpcell.frac_coords[:, i] > (1-cutoff)))[0]
         print('The length of decreaselist is:', len(decreaselist))
-        for cutoffindex in decreaselist:
+        # edgelist is a list of sites, it contains the sites belong to the edge fragments, not index
+        # find out the index later
+        edgesite = list()
+        # key function is: getSingleMol(supercell, middleSite, bondDict, middleSiteIndex)
+        for cutindex in decreaselist:
             # if this index in the decreaselist is already in the cutoffindex
             # then don't waste time to find out the fragment for it
-            if cutoffindex in edgeindexlist:
+            if tmpcell[cutindex] in edgesite:
                 pass
             else:
                 # choose the first site index in the decreaselist as the starting middleSiteIndex
                 # getSingleMol returns a dictionary, key is index, value is site
-                fragment = getSingleMol(tmpcell, tmpcell.sites[cutoffindex], bondDict, cutoffindex)
-                for siteindex in fragment.keys():
-                    edgeindexlist.append(int(siteindex))
-            print('The length of edgeindexlist is:', len(edgeindexlist))
-        # now the fragmentlist is the list full of edge fragment sites
-        tmpcell.remove_sites(edgeindexlist)
-        indexlist.append(edgeindexlist)
-        celllist.append(tmpcell)
-    return indexlist[0], indexlist[1], indexlist[2], celllist[0], celllist[1], celllist[2]
+                fragment = getSingleMol(tmpcell, tmpcell.sites[cutindex], bondDict, cutindex)
+                for key in fragment.keys():
+                    edgesite.append(fragment[key])
+            # before remove the edge sites, make a copy
+            print('The length of edge index is:', len(edgesite))
+        edgeindex = list()
+        for i, site in enumerate(supercell.sites):
+            if site in edgesite:
+                edgeindex.append(i)
+        indexlist.append(edgeindex)
+    return indexlist[0], indexlist[1], indexlist[2]
