@@ -139,14 +139,14 @@ class checker(object):
         self.mpc = getMPC(supercell, self.fineGrid, self.molslist)
         print('The closest distance between molecular center of masses is:', "{:0.2f}".format(self.intermoldist))
 
-    def checkconv(self, convThreshold=0.05):
+    def checkconv(self, convThreshold=0.05, convDist=1.0):
         start_time = time.time()
         print('Checking the convergence for founded exciton wavefunction calculations...')
         # need to get the index for the cube file edge fragments
         supercell = loadCubeCell(os.path.join(self.checklist[0]))
         print('Getting the index for edge fragments')
         self.edgeAindex, self.edgeBindex, self.edgeCindex = getEdgeFragmentsIndex(supercell, self.mollen,\
-            self.intermoldist, self.fineGrid, self.bondDict)
+            self.intermoldist, self.fineGrid, self.bondDict, adjustment=convDist)
         print('time cost is:', time.time()-start_time)
         for name in self.checklist:
             os.chdir(name)
