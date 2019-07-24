@@ -2,6 +2,7 @@ import os
 from .functions import *
 from .structio import *
 from .ref import *
+import time
 
 # automator is the core class for dbaAutomator, functions are:
 # 1. select the molecule in the middle of the supercell
@@ -139,6 +140,7 @@ class checker(object):
         print('The closest distance between molecular center of masses is:', "{:0.2f}".format(self.intermoldist))
 
     def checkconv(self, convThreshold=0.05):
+        start_time = time.time()
         print('Checking the convergence for founded exciton wavefunction calculations...')
         # need to get the index for the cube file edge fragments
         supercell = loadCubeCell(os.path.join(self.checklist[0]))
@@ -146,8 +148,9 @@ class checker(object):
         #self.supermolslist = getAllMols(tmpstruct, self.bondDict)
         print('Getting the index for edge fragments')
         #self.edgeAindex, self.edgeBindex, self.edgeCindex = getEdgeIndex(self.supermolslist, supercell, self.intermoldist)
-        self.edgeAindex, self.edgeBindex, self.edgeCindex = getEdgeFragmentsIndex(supercell, self.mollen, \
+        self.edgeAindex, self.edgeBindex, self.edgeCindex = getEdgeFragmentsIndexDelMiddle(supercell, self.mollen, \
                                                                 self.intermoldist, self.fineGrid, self.bondDict)
+        print('time cost is:', time.time()-start_time)
         # for name in self.checklist:
         #     os.chdir(name)
         #     print()
