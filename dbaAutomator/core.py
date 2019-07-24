@@ -144,25 +144,22 @@ class checker(object):
         print('Checking the convergence for founded exciton wavefunction calculations...')
         # need to get the index for the cube file edge fragments
         supercell = loadCubeCell(os.path.join(self.checklist[0]))
-        #print('This is the test function, getting all fragments')
-        #self.supermolslist = getAllMols(tmpstruct, self.bondDict)
         print('Getting the index for edge fragments')
-        #self.edgeAindex, self.edgeBindex, self.edgeCindex = getEdgeIndex(self.supermolslist, supercell, self.intermoldist)
-        self.edgeAindex, self.edgeBindex, self.edgeCindex = getEdgeFragmentsIndexDelMiddle(supercell, self.mollen, \
-                                                                self.intermoldist, self.fineGrid, self.bondDict)
+        self.edgeAindex, self.edgeBindex, self.edgeCindex = getEdgeFragmentsIndex(supercell, self.mollen,\
+            self.intermoldist, self.fineGrid, self.bondDict)
         print('time cost is:', time.time()-start_time)
-        # for name in self.checklist:
-        #     os.chdir(name)
-        #     print()
-        #     print('Now check folder:', name)
-        #     print('Loading ACF.dat...')
-        #     chargematrix = loadChargeMatrix(supercell, name)
-        #     chargedira = getChargeShare(self.edgeAindex, chargematrix)
-        #     chargedirb = getChargeShare(self.edgeBindex, chargematrix)
-        #     chargedirc = getChargeShare(self.edgeCindex, chargematrix)
-        #     printChargeShare(chargedira, chargedirb, chargedirc, convThreshold)
-        #     os.chdir('../')
-    
+        for name in self.checklist:
+            os.chdir(name)
+            print()
+            print('Now check folder:', name)
+            print('Loading ACF.dat...')
+            chargematrix = loadChargeMatrix(supercell, name)
+            chargedira = getChargeShare(self.edgeAindex, chargematrix)
+            chargedirb = getChargeShare(self.edgeBindex, chargematrix)
+            chargedirc = getChargeShare(self.edgeCindex, chargematrix)
+            printChargeShare(chargedira, chargedirb, chargedirc, convThreshold)
+            os.chdir('../')
+
     def calct(self, filepath):
         self.unitcell = loadUnitCell(filepath)
         self.bondDict = getBondDict(self.unitcell, bondCutoff)
