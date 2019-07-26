@@ -1,10 +1,10 @@
 """ 
-    utility.py provide all functions:
-
-    - loadUnitCell(path)
-    path is the dataPath, dataPath needs to be defined
-    in the files.py
-    
+    Author: Xingyu (Alfred) Liu 
+    Email: xingyu.alfred.liu@gmail.com
+    Description:
+        functions.py provide all functions, input 
+        and feature explanations can be found 
+        around the functions.
 """
 
 import os
@@ -18,6 +18,9 @@ from itertools import filterfalse
 from shutil import copy2
 import math
 
+# getSingleMol finds a singlemolecule with provided crystal and the
+# starting pymatgen site and index
+# return: dict, key is index of the site, value is the site
 def getSingleMol(supercell, middleSite, bondDict, middleSiteIndex):
     candidates = [middleSite]
     candidatesIndex = [middleSiteIndex]
@@ -53,6 +56,10 @@ def getSingleMol(supercell, middleSite, bondDict, middleSiteIndex):
         tmpSites = []
     return singleMol
 
+# getCentralSingleMol finds the atom closest to the middle of the crystal
+# and use getSingleMol return the dictionay using index as key and sites 
+# as values
+# return: same as getSingleMol
 def getCentralSingleMol(supercell, bondDict, middle=[0.5, 0.5, 0.5]):
     # check if the frac_coord is smaller than zero
     # if smaller than zero, change the middle site coords to negative
@@ -73,6 +80,9 @@ def getCentralSingleMol(supercell, bondDict, middle=[0.5, 0.5, 0.5]):
     centralSingleMol = getSingleMol(supercell, middleSite, bondDict, middleSiteIndex)
     return centralSingleMol
 
+# getBondDict use bondCutoff reference and input structure
+# to decide which kind of bonding should be selected
+# return: dictionary, using atom pair as key, and the vdW distance as value
 def getBondDict(supercell, bondCutoff):
     bondDict = dict()
     speciesList = list(set(supercell.species))
@@ -90,6 +100,8 @@ def getBondDict(supercell, bondCutoff):
     bondDict.update(duplicate)
     return bondDict
 
+# getSuperCell makes a super using pymatgen make_supercell
+# return: pymatgen Structure object
 def getSuperCell(unitcell, finegrid):
     if finegrid != []:
         print('Reminder: Please make sure you type in the correct fine grid.')
@@ -100,6 +112,9 @@ def getSuperCell(unitcell, finegrid):
 
 # !!! important !!!
 # this function sets the charge percentage threshold as 1%
+# getHolePositions finds out the hole positions with given bader output (chargeMatrix) and 
+# structure
+# return: dictionary, with charge site index as key and hole position as value
 def getHolePositions(chargeMatrix, singleMol, unitcell, bondDict, chargeThreshold=0.01):
     bondlength = 0
     for key in bondDict:
@@ -128,6 +143,9 @@ def getHolePositions(chargeMatrix, singleMol, unitcell, bondDict, chargeThreshol
         holePositions[charindex] = findHole(unitcell, twoNeighbors, chargeSite)
     return holePositions
 
+# find out hole position with given structure and charge site and corresponding two
+# neighbors
+# return hole positions fractional coords, using unitcell lattice vectors
 def findHole(unitcell, twoNeighbors, chargeSite):
     point1 = deepcopy(twoNeighbors[0][0].coords)
     point2 = deepcopy(twoNeighbors[1][0].coords)
@@ -141,6 +159,8 @@ def findHole(unitcell, twoNeighbors, chargeSite):
     tmpcell.append('He', holePosition, coords_are_cartesian=True)
     return tmpcell.sites[-1].frac_coords
 
+# calculate the normal vector with given three coords
+# return: list, indicating the normal vector
 def calNormalVector(p1, p2, p3):
     # generate the vector
     vector = [0, 0, 0]
@@ -154,6 +174,8 @@ def calNormalVector(p1, p2, p3):
         vector[i] = vector[i] / sigma
     return vector
 
+# finds the site index with given search range from a structure
+# return: dict, molecular site index as key and structure site index as value
 def getMoleculeIndex(singleMol, cubecell, threshold = 0.01):
     molIndex = dict()
     for i, molsite in enumerate(singleMol.sites):
@@ -292,9 +314,10 @@ def getEdgeFragmentsIndex(supercell, mollen, intermoldist, finegrid, bondDict, a
         sign = -1
     else:
         sign = 1
-    # check in three ranges
+    # check in three dimensions
     for i in range(3):
-        cutoff = intermoldist * adjustment * sign / supercell.lattice.abc[i]
+        # cutoff = intermoldist * adjustment * sign / supercell.lattice.abc[i]
+        cutoff = adjustment * sign * (1/finegrid[i])
         print('The cutoff is:', cutoff)
         # decreaselist tells the index for atoms within the cutoff range
         # search start from these atoms

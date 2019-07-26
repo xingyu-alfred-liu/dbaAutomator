@@ -1,3 +1,12 @@
+""" 
+    Author: Xingyu (Alfred) Liu 
+    Email: xingyu.alfred.liu@gmail.com
+    Description:
+        core.py is the core of dbaAutomator, it provides two modules
+        - automator: guide the dba process
+        - checker: check convergence and CT character
+"""
+
 import os
 from .functions import *
 from .structio import *

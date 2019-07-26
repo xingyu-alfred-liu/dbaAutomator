@@ -1,3 +1,10 @@
+""" 
+    Author: Xingyu (Alfred) Liu 
+    Email: xingyu.alfred.liu@gmail.com
+    Description:
+        structio.py handles all io related functions
+"""
+
 import os
 import sys
 from pymatgen import Molecule
