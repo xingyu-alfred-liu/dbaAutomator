@@ -153,9 +153,9 @@ class checker(object):
         print('Checking the convergence for founded exciton wavefunction calculations...')
         # need to get the index for the cube file edge fragments
         supercell = loadCubeCell(os.path.join(self.checklist[0]))
-        print('Getting the index for edge fragments')
-        self.edgeAindex, self.edgeBindex, self.edgeCindex = getEdgeFragmentsIndex(supercell, self.mollen,\
-            self.intermoldist, self.fineGrid, self.bondDict, adjustment=convDist)
+        # print('Getting the index for edge fragments')
+        # self.edgeAindex, self.edgeBindex, self.edgeCindex = getEdgeFragmentsIndex(supercell, self.mollen,\
+        #     self.intermoldist, self.fineGrid, self.bondDict, adjustment=convDist)
         print('time cost is:', time.time()-start_time)
         for name in self.checklist:
             os.chdir(name)
