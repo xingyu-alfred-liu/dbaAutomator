@@ -363,3 +363,19 @@ def getMoleculeLength(molslist):
                     dist = tmpdist
     # thus give the longest distance within one molecule
     return dist
+
+def getBoxEdgeIndex(supercell, fineGrid, boxedgeDist):
+    if max(supercell.frac_coords[:, 0]) < 0:
+        sign = -1
+    else:
+        sign = 1
+    # check three dimensions, boxedgeDist is the cutoff range
+    indexlist = list()
+    cutoff = boxedgeDist*sign
+    for i in range(3):
+        if sign > 0:
+            edgeIndex = np.where(np.logical_or(supercell.frac_coords[:, i] < cutoff, supercell.frac_coords[:, i] < (1-cutoff)))[0]
+        elif sign < 0:
+            edgeIndex = np.where(np.logical_or(supercell.frac_coords[:, i] > cutoff, supercell.frac_coords[:, i] < (-1-cutoff)))[0]
+        indexlist.append(edgeIndex)
+    return indexlist[0], indexlist[1], indexlist[2]
