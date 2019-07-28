@@ -372,9 +372,10 @@ def getBoxEdgeIndex(supercell, fineGrid, boxedgeDist):
     # check three dimensions, boxedgeDist is the cutoff range
     indexlist = list()
     cutoff = boxedgeDist*sign
+    print('The cutoff is:', cutoff)
     for i in range(3):
         if sign > 0:
-            edgeIndex = np.where(np.logical_or(supercell.frac_coords[:, i] < cutoff, supercell.frac_coords[:, i] < (1-cutoff)))[0]
+            edgeIndex = np.where(np.logical_or(supercell.frac_coords[:, i] < cutoff, supercell.frac_coords[:, i] > (1-cutoff)))[0]
         elif sign < 0:
             edgeIndex = np.where(np.logical_or(supercell.frac_coords[:, i] > cutoff, supercell.frac_coords[:, i] < (-1-cutoff)))[0]
         indexlist.append(edgeIndex)
