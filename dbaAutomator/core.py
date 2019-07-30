@@ -172,6 +172,10 @@ class checker(object):
             chargedirb = getChargeShare(self.boxedgeBindex, chargematrix)
             chargedirc = getChargeShare(self.boxedgeCindex, chargematrix)
             printChargeShare(chargedira, chargedirb, chargedirc, convThreshold)
+            self.boxEdgeAll = getAllEdgeIndex(self.boxedgeAindex, self.boxedgeBindex, self.boxedgeCindex)
+            print(self.boxEdgeAll)
+            chargeAllEdge = getChargeShare(self.boxEdgeAll.astype(int), chargematrix)
+            print('The total charge share for all edge sites is:', "{:0.2f}".format(chargeAllEdge*100), "%")
             os.chdir('../')
 
     def calct(self, filepath):

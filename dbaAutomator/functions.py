@@ -380,3 +380,11 @@ def getBoxEdgeIndex(supercell, fineGrid, boxedgeDist):
             edgeIndex = np.where(np.logical_or(supercell.frac_coords[:, i] > cutoff, supercell.frac_coords[:, i] < (-1-cutoff)))[0]
         indexlist.append(edgeIndex)
     return indexlist[0], indexlist[1], indexlist[2]
+
+def getAllEdgeIndex(a, b, c):
+    allindex = np.array([])
+    allindex = np.append(allindex, a)
+    allindex = np.append(allindex, b)
+    allindex = np.append(allindex, c)
+    uniqueIndex = np.unique(allindex)
+    return uniqueIndex
