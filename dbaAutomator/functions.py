@@ -120,7 +120,7 @@ def getHolePositions(chargeMatrix, singleMol, unitcell, bondDict, chargeThreshol
     for key in bondDict:
         if bondDict[key] >= bondlength:
             bondlength = bondDict[key]
-    chargeIndex = np.where(chargeMatrix[:, 4] > chargeThreshold)[0]
+    chargeIndex = np.where(chargeMatrix > chargeThreshold)[0]
     holePositions = dict()
     for charindex in chargeIndex:
         chargeSite = singleMol.sites[charindex]
@@ -196,7 +196,7 @@ def getMoleculeIndex(singleMol, cubecell, threshold = 0.01):
 def getMolShare(chargeMatrix, molIndex):
     molshare = 0
     for key in molIndex.keys():
-        molshare += chargeMatrix[molIndex[key]][4]
+        molshare += chargeMatrix[molIndex[key]]
     return molshare
     
 def getXctPath(path, checklist):
@@ -273,7 +273,7 @@ def getAtomIndex(struct, convrange):
 # take the indices and chargematrix, return
 # the charge share for indicated indices
 def getChargeShare(indices, chargematrix):
-    return np.sum(chargematrix[indices], axis=0)[4]
+    return np.sum(chargematrix[indices])
 
 def checkDataFolder(path):
     folderlist = ['dba', 'singlemolecule', 'supercell', 'unitcell']

@@ -108,7 +108,7 @@ class automator(object):
         print()
         print('Computing charge transfer character now...')
         self.holeindexlist = np.array(holelist).astype(int)
-        tmpcharge = self.smcharge / (np.sum(self.smcharge[self.holeindexlist], axis=0)[4])
+        tmpcharge = self.smcharge / np.sum(self.smcharge[self.holeindexlist])
         chargetransfer = 0
         for hole in self.holeindexlist:
             chargetransfer += chargeshare[str(hole)] * tmpcharge[hole][4]

@@ -72,8 +72,8 @@ def loadChargeMatrix(struct, path):
         # should also check if this charge file is correct
         with open(os.path.join(path, 'ACF.dat'), 'r') as infile:
             for values in infile:
-                if len(values.split()) == 7 and values.split()[0].isdigit():
-                    chargeMatrix.append(values.split())
+                if len(values.split()) == 7 and values.split()[0] != '#':
+                    chargeMatrix.append(values.split()[4])
                 else:
                     pass
     except FileNotFoundError as fileerr:
@@ -85,8 +85,8 @@ def loadChargeMatrix(struct, path):
     chargeMatrix = chargeMatrix.astype(float)
     if struct.num_sites != len(chargeMatrix):
         raise Exception("!!!Error!!!\nThe number of atoms does not match with molecule number")
-    chargeSum = np.sum(chargeMatrix, axis=0)
-    chargeMatrix[:, 4] /= chargeSum[4]
+    chargeSum = np.sum(chargeMatrix)
+    chargeMatrix /= chargeSum
     # returned chargeMatrix provides the charge percentage and atom index
     return chargeMatrix
 
