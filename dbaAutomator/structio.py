@@ -58,8 +58,7 @@ def loadUnitCell(path):
             except:
                 pass
     unitcell.set_pbc((True, True, True))
-    pmgobj = AseAtomsAdaptor()
-    pmgstruct = pmgobj.get_structure(unitcell)
+    pmgstruct = AseAtomsAdaptor.get_structure(unitcell)
     return pmgstruct
 
 def loadSingleMol(path):
@@ -128,8 +127,7 @@ def loadCubeCell(path):
             is put under the folder \'supercell\'.')
         sys.exit()
     else:
-        pmgobj = AseAtomsAdaptor()
-        pmgstruct = pmgobj.get_structure(asestruct)
+        pmgstruct = AseAtomsAdaptor.get_structure(asestruct)
         return pmgstruct
 
 def loadHolePositions(path):
