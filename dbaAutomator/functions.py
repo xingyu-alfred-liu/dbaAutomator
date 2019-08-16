@@ -388,3 +388,22 @@ def getAllEdgeIndex(a, b, c):
     allindex = np.append(allindex, c)
     uniqueIndex = np.unique(allindex)
     return uniqueIndex
+
+def getIndexAroundHole(holeCoords, supercell, intermoldist, bondDict, moldistMul):
+    # first find out the index of atoms within the sphere, with hole as the center
+    # make sure include_index=True
+    # so that the third returned value within a neighbor is the index
+    sphereNeighbors = supercell.get_neighbors(supercell.sites[-1], intermoldist*moldistMul, include_index=True)
+    # remove this He atom, which is actually the hole position
+    supercell.remove_species(["He"])
+    sphereFragmentIndex = list()
+    for neighbor in sphereNeighbors:
+        if neighbor[2] in sphereFragmentIndex:
+            pass
+        else:
+            # tmpMol is a dict, with key:index, value:site
+            tmpMol = getSingleMol(supercell, neighbor[0], bondDict, neighbor[2])
+            for index in tmpMol.keys():
+                sphereFragmentIndex.append(index)
+    print('The length of complete fragments around the hole is:', len())
+    return sphereFragmentIndex

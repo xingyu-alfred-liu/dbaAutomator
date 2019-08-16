@@ -148,36 +148,6 @@ class checker(object):
         self.mpc = getMPC(supercell, self.fineGrid, self.molslist)
         print('The closest distance between molecular center of masses is:', "{:0.2f}".format(self.intermoldist))
 
-    def checkconv(self, convThreshold=0.05, convDist=1.0):
-        start_time = time.time()
-        print('Checking the convergence for founded exciton wavefunction calculations...')
-        # need to get the index for the cube file edge fragments
-        supercell = loadCubeCell(os.path.join(self.checklist[0]))
-        # print('Getting the index for edge fragments')
-        # self.edgeAindex, self.edgeBindex, self.edgeCindex = getEdgeFragmentsIndex(supercell, self.mollen,\
-        #     self.intermoldist, self.fineGrid, self.bondDict, adjustment=convDist)
-        print('time cost is:', time.time()-start_time)
-        for name in self.checklist:
-            os.chdir(name)
-            print()
-            print('Now check folder:', name)
-            # print('Loading ACF.dat...')
-            print('Loading ACF.dat and cube file...')
-            self.boxedgeAindex, self.boxedgeBindex, self.boxedgeCindex = getBoxEdgeIndex(supercell, self.fineGrid, boxedgeDist=convDist)
-            chargematrix = loadChargeMatrix(supercell, name)
-            # chargedira = getChargeShare(self.edgeAindex, chargematrix)
-            # chargedirb = getChargeShare(self.edgeBindex, chargematrix)
-            # chargedirc = getChargeShare(self.edgeCindex, chargematrix)
-            chargedira = getChargeShare(self.boxedgeAindex, chargematrix)
-            chargedirb = getChargeShare(self.boxedgeBindex, chargematrix)
-            chargedirc = getChargeShare(self.boxedgeCindex, chargematrix)
-            printChargeShare(chargedira, chargedirb, chargedirc, convThreshold)
-            self.boxEdgeAll = getAllEdgeIndex(self.boxedgeAindex, self.boxedgeBindex, self.boxedgeCindex)
-            print(self.boxEdgeAll)
-            chargeAllEdge = getChargeShare(self.boxEdgeAll.astype(int), chargematrix)
-            print('The total charge share for all edge sites is:', "{:0.2f}".format(chargeAllEdge*100), "%")
-            os.chdir('../')
-
     def calct(self, filepath):
         self.unitcell = loadUnitCell(filepath)
         self.bondDict = getBondDict(self.unitcell, bondCutoff)
@@ -207,3 +177,43 @@ class checker(object):
             frenkel = getMolShare(chargematrix, molIndex)
             print('The charge transfer character for this hole position is:', "{:0.2f}".format((1-frenkel)*100), "%.")
             os.chdir("../")
+
+    def checkconv(self, convThreshold=0.05, convDist=1.0, moldistMul=1.0):
+        start_time = time.time()
+        print('Checking the convergence for founded exciton wavefunction calculations...')
+        # need to get the index for the cube file edge fragments
+        supercell = loadCubeCell(os.path.join(self.checklist[0]))
+        # print('Getting the index for edge fragments')
+        # self.edgeAindex, self.edgeBindex, self.edgeCindex = getEdgeFragmentsIndex(supercell, self.mollen,\
+        #     self.intermoldist, self.fineGrid, self.bondDict, adjustment=convDist)
+        print('time cost is:', time.time()-start_time)
+        for name in self.checklist:
+            os.chdir(name)
+            print()
+            print('Now check folder:', name)
+            # print('Loading ACF.dat...')
+            print('Loading ACF.dat and cube file...')
+            self.boxedgeAindex, self.boxedgeBindex, self.boxedgeCindex = getBoxEdgeIndex(supercell, self.fineGrid, boxedgeDist=convDist)
+            holePosition = loadPlotxct(name)
+            tmpunitcell = self.unitcell.copy()
+            tmpunitcell.append('He', holePosition)
+            holeCartesianCoords = tmpunitcell.sites[-1].coords
+            tmpsupercell = supercell.copy()
+            tmpsupercell.append('He', holeCartesianCoords, coords_are_cartesian=True)
+            holeEnvIndex = getIndexAroundHole(holeCartesianCoords, tmpsupercell, self.intermoldist, self.bondDict, moldistMul)
+            chargematrix = loadChargeMatrix(supercell, name)
+            # chargedira = getChargeShare(self.edgeAindex, chargematrix)
+            # chargedirb = getChargeShare(self.edgeBindex, chargematrix)
+            # chargedirc = getChargeShare(self.edgeCindex, chargematrix)
+            chargedira = getChargeShare(self.boxedgeAindex, chargematrix)
+            chargedirb = getChargeShare(self.boxedgeBindex, chargematrix)
+            chargedirc = getChargeShare(self.boxedgeCindex, chargematrix)
+            # get the charge occupied by the hole-around fragments
+            holeEnvCharge = getChargeShare(holeEnvIndex, chargematrix)
+            printChargeShare(chargedira, chargedirb, chargedirc, convThreshold)
+            self.boxEdgeAll = getAllEdgeIndex(self.boxedgeAindex, self.boxedgeBindex, self.boxedgeCindex)
+            print(self.boxEdgeAll)
+            chargeAllEdge = getChargeShare(self.boxEdgeAll.astype(int), chargematrix)
+            print('The total charge share for all edge sites is:', "{:0.2f}".format(chargeAllEdge*100), "%")
+            print('The charge occupied by the hole-around fragments is:', "{:0.2f}".format(holeEnvCharge*100), "%")
+            os.chdir('../')
