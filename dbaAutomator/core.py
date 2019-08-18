@@ -150,7 +150,7 @@ class checker(object):
         self.mpc = getMPC(supercell, self.fineGrid, self.molslist)
         print('The closest distance between molecular center of masses is:', "{:0.2f}".format(self.intermoldist))
 
-    def checkconv(self, convThreshold=0.05, edgeDistMul=1.0, molDistMul=1.0):
+    def checkconv(self, convThreshold=0.05, edgeDist=1.0, molDistMul=1.0):
         start_time = time.time()
         print('Checking the convergence for founded exciton wavefunction calculations...')
         # need to get the index for the cube file edge fragments
@@ -163,13 +163,10 @@ class checker(object):
             os.chdir(name)
             print()
             print('Now check folder:', name)
-            # print('Loading ACF.dat...')
-            print('Loading ACF.dat and cube file...')
-            self.boxedgeAindex, self.boxedgeBindex, self.boxedgeCindex = getBoxEdgeIndex(supercell, self.fineGrid, boxedgeDist=edgeDistMul)
+            print('Loading ACF.dat...')
+            # now get the edge spacek index and charge first
+            self.boxedgeAindex, self.boxedgeBindex, self.boxedgeCindex = getBoxEdgeIndex(supercell, self.fineGrid, boxedgeDist=edgeDist)
             chargematrix = loadChargeMatrix(supercell, name)
-            # chargedira = getChargeShare(self.edgeAindex, chargematrix)
-            # chargedirb = getChargeShare(self.edgeBindex, chargematrix)
-            # chargedirc = getChargeShare(self.edgeCindex, chargematrix)
             chargedira = getChargeShare(self.boxedgeAindex, chargematrix)
             chargedirb = getChargeShare(self.boxedgeBindex, chargematrix)
             chargedirc = getChargeShare(self.boxedgeCindex, chargematrix)
