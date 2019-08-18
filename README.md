@@ -33,6 +33,15 @@ In case you are not familiar with `pymatgen`, here is the [link](https://pymatge
 
 `numpy` and `ase` can be installed with `pip`
 
+#### Compile bader
+Go to the `bader` folder under `dbaAutomator`, choose a proper makefile  
+There are four template makefiles available, with the same format as `makefile.*`  
+The template makefiles support `ifort` and `gfortran` compilers with `linux` and `macos` operating system  
+Here we use `gfortran` with `linux` as example  
+`cd dbaAutomator/bader/`  
+`cp makefile.lnx_gfortran Makefile`
+`cd ../../`
+
 #### Install dbaAutomator
 `python setup.py install`  
 `cd ..`  
