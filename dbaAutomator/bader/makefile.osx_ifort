@@ -1,12 +1,10 @@
 .SUFFIXES: .f90
 
 FC = ifort
-#FC = gfortran
 
-FFLAGS = -O2 -CB
+FFLAGS = -O2
 
-LINK = -static
-DLINK = -dynamic -fPIC
+LINK = -i-static
 
 OBJS = kind_mod.o       \
        matrix_mod.o     \
@@ -18,24 +16,21 @@ OBJS = kind_mod.o       \
        io_mod.o         \
        bader_mod.o      \
        voronoi_mod.o    \
-       multipole_mod.o  \
-       weight_mod.o \
-       dsyevj3_mod.o \
+       multipole_mod.o \
+       weight_mod.o    \
+       dsyevj3_mod.o   \
        critpoint_mod.o 
-
 
 %.o %.mod : %.f90
 	$(FC) $(FFLAGS) -c $*.f90
 
 bader: $(OBJS) main.o
-	rm -f bader 
+	rm -f bader
 	$(FC) $(LINK) main.o -o $@ $(OBJS) 
-	cp -f bader ../../bin
 
 dist: bader
-	tar -cf bader_lnx_64.tar bader
-	gzip -9 bader_lnx_64.tar
+	tar -cf bader_osx_intel.tar bader
+	gzip -9 bader_osx_intel.tar
 
 clean:
-	rm -f *.o *.mod bader bader_lnx_64.tar.gz ../../bin/*
-
+	rm -f *.o *.mod bader bader_osx_intel.tar.gz

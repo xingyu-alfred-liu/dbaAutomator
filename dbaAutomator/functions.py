@@ -405,5 +405,5 @@ def getIndexAroundHole(holeCoords, supercell, intermoldist, bondDict, moldistMul
             tmpMol = getSingleMol(supercell, neighbor[0], bondDict, neighbor[2])
             for index in tmpMol.keys():
                 sphereFragmentIndex.append(index)
-    print('The length of complete fragments around the hole is:', len())
+    print('The length of complete fragments around the hole is:', len(sphereFragmentIndex))
     return sphereFragmentIndex
