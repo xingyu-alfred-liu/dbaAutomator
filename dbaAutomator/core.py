@@ -111,7 +111,7 @@ class automator(object):
         tmpcharge = self.smcharge / np.sum(self.smcharge[self.holeindexlist])
         chargetransfer = 0
         for hole in self.holeindexlist:
-            chargetransfer += chargeshare[str(hole)] * tmpcharge[hole][4]
+            chargetransfer += chargeshare[str(hole)] * tmpcharge[hole]
         print('The total charge transfer character is:', "{:0.2f}".format((1-chargetransfer)*100), "%.")
         # at last, decide if want to write the result into a file
         if writeresult:

@@ -206,8 +206,8 @@ def writedbaResult(path, chargeshare, chargetransfer):
             elif decision == 'N':
                 sys.exit('Exit now...')
             else:
-                print('Please type in either Y or N.')
+                print('Please type in either Y or N.\n')
     with open(os.path.join(supercellPath, filename), 'w') as file:
         for hole in chargeshare.keys():
-            file.write('The charge transfer for hole', hole, 'is:', "{:0.2f}".format((1-chargeshare[hole])*100), "%.\n")
-        file.write('The total charge transfer is:', "{:0.2f}".format((1-chargetransfer)*100), "%.\n")
+            file.write("The charge transfer for hole "+hole+"is: "+"{:0.2f}".format((1-chargeshare[hole])*100)+" %.\n")
+        file.write("The total charge transfer is: "+"{:0.2f}".format((1-chargetransfer)*100)+" %.\n")
