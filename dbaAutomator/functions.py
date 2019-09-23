@@ -121,6 +121,14 @@ def getHolePositions(chargeMatrix, singleMol, unitcell, bondDict, chargeThreshol
         if bondDict[key] >= bondlength:
             bondlength = bondDict[key]
     chargeIndex = np.where(chargeMatrix > chargeThreshold)[0]
+    holeProb = 0
+    for charindex in chargeIndex:
+        if chargeMatrix[charindex] > holeProb:
+            holeHighProbIndex = charindex
+            holeProb = chargeMatrix[charindex]
+    print('The hole with index: %s has the highest probability.\n' %str(holeHighProbIndex))
+    print('Please consider converge the exciton wave function calculated with this hole first.\n')
+    print('You can use the checker object for convergence check.\n')
     holePositions = dict()
     for charindex in chargeIndex:
         chargeSite = singleMol.sites[charindex]

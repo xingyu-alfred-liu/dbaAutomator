@@ -194,7 +194,7 @@ def writedbaResult(path, chargeshare, chargetransfer):
     supercellPath = os.path.join(path, 'supercell')
     # json does not allow numpy,int64
     # convert values into list of float
-    filename = 'dba.txt'
+    filename = 'dba.out'
     if filename in os.listdir(supercellPath):
         print('There is one dba.txt from previous calculation')
         print('The old file will be rewritten')
@@ -208,6 +208,9 @@ def writedbaResult(path, chargeshare, chargetransfer):
             else:
                 print('Please type in either Y or N.\n')
     with open(os.path.join(supercellPath, filename), 'w') as file:
+        file.write('#####################################\n')
+        file.write('Please cite XXX if you use dbaAutomator for your calculations.\n')
+        file.write('#####################################\n')
         for hole in chargeshare.keys():
             file.write("The charge transfer for hole "+hole+" is: "+"{:0.2f}".format((1-chargeshare[hole])*100)+" %.\n")
         file.write("The total charge transfer is: "+"{:0.2f}".format((1-chargetransfer)*100)+" %.\n")
