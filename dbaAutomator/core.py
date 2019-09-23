@@ -47,8 +47,9 @@ class automator(object):
                 print(key, self.singleMol[key])
             return self.singleMol
 
-    def getholes(self, returnholes=False, writeinput=True, chargeThreshold=0.01):
+    def getholes(self, returnholes=False, writeinput=True, chargeThreshold=0.01, holeAtomDist=-0.8):
         self.chargeThreshold = chargeThreshold
+        self.holeAtomDist = holeAtomDist
         print('The charge threshold you chose for choosing the hole-placed site is:', "{:0.2f}".format(self.chargeThreshold), "%.")
         print('Now locate the hole positions...')
         print('Loading the output central single molecule...')
@@ -57,7 +58,8 @@ class automator(object):
         self.chargeMatrix = loadChargeMatrix(self.centralmol, os.path.join(self.path, 'singlemolecule'))
         print('Looking for hole positions...')
         tmpunitcell = self.unitcell.copy()
-        self.holeSites = getHolePositions(self.chargeMatrix,self.centralmol,tmpunitcell,self.bondDict,self.chargeThreshold)
+        self.holeSites = getHolePositions(self.chargeMatrix, self.centralmol, tmpunitcell, self.bondDict,\
+                                                                  self.chargeThreshold, self.holeAtomDist)
         if returnholes:
             print()
             print('The chosen holes are:')

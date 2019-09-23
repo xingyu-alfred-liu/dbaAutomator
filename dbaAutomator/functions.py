@@ -115,7 +115,7 @@ def getSuperCell(unitcell, finegrid):
 # getHolePositions finds out the hole positions with given bader output (chargeMatrix) and 
 # structure
 # return: dictionary, with charge site index as key and hole position as value
-def getHolePositions(chargeMatrix, singleMol, unitcell, bondDict, chargeThreshold=0.01):
+def getHolePositions(chargeMatrix, singleMol, unitcell, bondDict, chargeThreshold, holeAtomDist):
     bondlength = 0
     for key in bondDict:
         if bondDict[key] >= bondlength:
@@ -140,18 +140,18 @@ def getHolePositions(chargeMatrix, singleMol, unitcell, bondDict, chargeThreshol
                         tmpBondLength = site[1]
                         removeSite = site
                 twoNeighbors.remove(removeSite)
-        holePositions[charindex] = findHole(unitcell, twoNeighbors, chargeSite)
+        holePositions[charindex] = findHole(unitcell, twoNeighbors, chargeSite, holeAtomDist)
     return holePositions
 
 # find out hole position with given structure and charge site and corresponding two
 # neighbors
 # return hole positions fractional coords, using unitcell lattice vectors
-def findHole(unitcell, twoNeighbors, chargeSite):
+def findHole(unitcell, twoNeighbors, chargeSite, holeAtomDist):
     point1 = deepcopy(twoNeighbors[0][0].coords)
     point2 = deepcopy(twoNeighbors[1][0].coords)
     point3 = deepcopy(chargeSite.coords)
     normalVec = calNormalVector(point1, point2, point3)
-    shift = -0.8
+    shift = holeAtomDist
     holePosition = [0, 0, 0]
     for i in range(3):
         holePosition[i] = chargeSite.coords[i] + normalVec[i]*shift
