@@ -126,8 +126,9 @@ def getHolePositions(chargeMatrix, singleMol, unitcell, bondDict, chargeThreshol
         if chargeMatrix[charindex] > holeProb:
             holeHighProbIndex = charindex
             holeProb = chargeMatrix[charindex]
-    print('The hole with index: %s has the highest probability.\n' %str(holeHighProbIndex))
-    print('Please consider converge the exciton wave function calculated with this hole first.\n')
+    print('Important!!!')
+    print('The hole with index: %s has the highest probability.' %str(holeHighProbIndex))
+    print('Please consider converge the exciton wave function calculated with this hole first.')
     print('You can use the checker object for convergence check.\n')
     holePositions = dict()
     for charindex in chargeIndex:
