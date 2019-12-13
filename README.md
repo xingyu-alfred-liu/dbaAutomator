@@ -58,7 +58,7 @@ Import `dbaAutomator.core.automator` and `os`
     >>> import os
     >>> from dbaAutomator.core import automator
 
-*__class__* `automator(datapath, finegrid, filepath=None, chargeThreshold=0.01)`  
+*__class__* `automator(datapath, finegrid, filepath=None)`  
 Description: guide the dba process.
 
 **Parameters**  
@@ -68,7 +68,8 @@ The absolute path where you want to put your data in. We suggest every users cre
 
     >>> os.mkdir('data')
     >>> os.chdir('data')
-    >>> os.path.abspath('.')
+    >>> datapath = os.path.abspath('.')
+    >>> datapath
     '/TheBestUser/PATH/TO/data'
 
 `finegrid`: **_list_**  
@@ -83,7 +84,7 @@ The absolute path to the input file which defines the unit cell. Here we use the
   
 Now one can define the automator object. The initial setup will lead to creation of necessary directories, duplication of input file to directory `unitcell`, and construction of supercell. 
 
-    >>>> dba = automator(datapath=datadir, finegrid=finegrid, filepath=filepath)
+    >>>> dba = automator(datapath=datapath, finegrid=finegrid, filepath=filepath)
     Directory dba created.
     Directory singlemolecule created.
     Directory supercell created.
@@ -130,7 +131,7 @@ The single molecule file will be written in the singlemol folder.
 
 #### Step 2: Locate the hole positions
 
-*__function__* `getholes(returnholes=False, writeinput=True, chargeThreshold=0.01)`  
+*__function__* `getholes(returnholes=False, writeinput=True, chargeThreshold=0.01, holeAtomDist=-0.8)`  
 Description: locate the hole positions and write the input files for ext wfn calculations and write the hole positions into a json file. 
 
 **Parameters**  
@@ -150,6 +151,10 @@ Each folder within this path represents a hole position.
 `chargeThreshold`: **_float_**  
 Default: `0.01`  
 Define the charge threshold of possible hole-placed atom sites. In other words, if one atom occupies charge more than this threshold, it will be considered as possible position to put hole near to. 
+
+`holeAtomDist`: **_float_**  
+Default: `-0.8`  
+Define the distance between the hole-positioned atom and the hole. We highly suggest users keep this default value.  
 
     >>> dba.getholes(returnholes=False, writeinput=True)
     Now locate the hole positions...
@@ -193,7 +198,7 @@ The charge transfer character information will be output under: `/TheBestUser/PA
     The total charge transfer character is: 99.30 %.
 
 
-### Check convergence, charge transfer
+### Check convergence, charge transfer character
 
 #### Define the checker object
 Import `dbaAutomator.core.checker`  
@@ -204,7 +209,9 @@ Description: used to check convergence of ext wfn calculation and calculate char
 **Parameters**  
 
 `path`: **_string_**  
-Feed in the path where you want to run checker. Check will run recurrently and find out all folder with `cube` file and corresponding `ACF.dat`, appended as part of a checklist. 
+Feed in the path where you want to run checker. Check will run recurrently and find out all folder with `cube` file and corresponding `ACF.dat`, appended as part of a checklist.  
+`finegrid`: **_list_**  
+Same definition as that in `automator`
 
     >>> from dbaAutomator.core import checker
     >>> checkpath = '/TheBestUser/PATH/TO/data/dba'
@@ -212,8 +219,13 @@ Feed in the path where you want to run checker. Check will run recurrently and f
 
 #### Compute the intermolecular distance
 
-*__function__* `prep()`  
-Description: load in the cube supercell and find all complete single molecules, and find out the smallest intermolecular distance. 
+*__function__* `prep(filepath)`  
+Description: load in the cube supercell and find all complete single molecules, and find out the smallest intermolecular distance.  
+
+**Parameters**  
+
+`filepath`: **_string_**  
+The path to the unitcell geometry file. 
 
     >>> dbachecker.prep()
     Loading supercell, this process might take minutes, please wait...
@@ -247,26 +259,25 @@ Description: load in the cube supercell and find all complete single molecules, 
 
 #### Check convergence of ext wfn calculation
 
-*__function__* `checkconv(convThreshold=0.05)`  
+*__function__* `checkconv(convThreshold=0.05, edgeDist=0.25)`  
 Description: load in the cube supercell and find all complete single molecules, and find out the smallest intermolecular distance. 
 
 **Parameters**
 
 `convThreshold `: **_float_**  
 Default: `0.05`
-Define the convergence threshold of charge occupied by edge atoms. 
+Define the convergence threshold of charge occupied by edge atoms.  
+
+`edgeDist `: **_float_**  
+Default: `0.25`
+Define the volume where the charge should be counted.  
 
 #### Compute charge transfer for specified conditions
 
-*__function__* `calct(filepath)`  
+*__function__* `calct()`  
 Description:  compute the charge transfer character for ext wfn calculation output defined in `check` class. 
 
-**Parameters**
-
-`filepath`: **_string_**  
-Defines the path to the mean field calculation input, which provides the unit cell structure. 
-
-    >>> dbachecker.calct('/TheBestUser/PATH/TO/in')
+    >>> dbachecker.calct()
     
     Now calculating charge transfer character in folder: /CHECK/LIST/66
     Loading supercell, this process might take minutes, please wait...

@@ -132,27 +132,13 @@ class checker(object):
             raise Exception('Warning!!! No suitable files found in folder:', self.path, "\n")
     
     def prep(self, filepath):
-        # load in unitcell and bond Dictionary
+        """load in unitcell and bond Dictionary"""
+
         print("Loading the unit cell geometry...")
         self.unitcell = loadUnitCell(filepath)
         self.bondDict = getBondDict(self.unitcell, bondCutoff)
-        # choose a supercell cell and get the inter molecular distance
-        # first get all complete single molecules
-        # tmpsupercell = loadCubeCell(self.checklist[0])
-        # supercell = tmpsupercell.copy()
-        # print('Looking for the primitive cell...')
-        # self.primitive = getPrimitiveCell(tmpsupercell)
-        # print('Looking for all fragments within constructed supercell...')
-        # tmpstruct = self.primitive.copy()
-        # tmpstruct = getSuperCell(tmpstruct, [2, 2, 2])
-        # self.molslist = getAllMols(tmpstruct, self.bondDict)
-        # self.intermoldist = getInterMolLen(self.molslist)
-        # self.mollen = getMoleculeLength(self.molslist)
-        # print('The longest distance in one molecule is:', "{:0.2f}".format(self.mollen))
-        # self.mpc = getMPC(supercell, self.fineGrid, self.molslist)
-        # print('The closest distance between molecular center of masses is:', "{:0.2f}".format(self.intermoldist))
 
-    def checkconv(self, convThreshold=0.05, edgeDist=0.25, molDistMul=1.0):
+    def checkconv(self, convThreshold=0.05, edgeDist=0.25):
         print('Checking the convergence for founded exciton wavefunction calculations...')
         # need to get the index for the cube file edge fragments
         supercell = loadCubeCell(os.path.join(self.checklist[0]))
@@ -178,19 +164,6 @@ class checker(object):
                 print("Your exciton wavefunction is NOT converged. Please consider using a denser fine k-point grid.\n")
             else:
                 print("Your exciton wavefunction is converged. Please proceed and finish the rest of the calculations.\n")
-            # now check the charge around the hole
-            # start from read in the hole position
-            # holePosition = loadPlotxct(name)
-            # print('The hole position in the input file is:', holePosition)
-            # tmpunitcell = self.unitcell.copy()
-            # tmpunitcell.append('He', holePosition)
-            # holeCartesianCoords = tmpunitcell.sites[-1].coords
-            # print('The Cartesian coordinates for this hole position is:', holeCartesianCoords)
-            # tmpsupercell = supercell.copy()
-            # tmpsupercell.append('He', holeCartesianCoords, coords_are_cartesian=True)
-            # holeEnvIndex = getIndexAroundHole(holeCartesianCoords, tmpsupercell, self.intermoldist, self.bondDict, molDistMul)
-            # holeEnvCharge = getChargeShare(holeEnvIndex, chargematrix)
-            # print('The charge occupied by the hole-around fragments is:', "{:0.2f}".format(holeEnvCharge*100), "%")
             os.chdir('../')
 
     def calct(self):
