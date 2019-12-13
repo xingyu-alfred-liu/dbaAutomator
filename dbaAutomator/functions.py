@@ -295,12 +295,16 @@ def checkDataFolder(path):
 
 def copyInput(file, path):
     unitcellpath = os.path.join(path, 'unitcell')
-    print('Copy unitcell file to', unitcellpath, '.')
-    copy2(file, unitcellpath)
+    print('Copy unitcell file to '+unitcellpath+'.')
+    try:
+        copy2(file, unitcellpath)
+    except:
+        print("Input structure file already exists.")
 
 def getMPC(supercell, finegrid, molslist):
-    # get the number of unitcells used to build the supercell
-    # get the number of atoms per cell
+    """ get the number of unitcells used to build the supercell
+    get the number of atoms per cell"""
+    
     supercellsize = finegrid[0] * finegrid[1] * finegrid[2]
     atomPerCell = len(supercell.sites) / supercellsize
     if len(molslist) == 0:

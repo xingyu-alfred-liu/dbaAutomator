@@ -83,7 +83,7 @@ The absolute path to the input file which defines the unit cell. Here we use the
   
 Now one can define the automator object. The initial setup will lead to creation of necessary directories, duplication of input file to directory `unitcell`, and construction of supercell. 
 
-    >>>> dba = automator(path=datadir, finegrid=finegrid, file=filepath)
+    >>>> dba = automator(datapath=datadir, finegrid=finegrid, filepath=filepath)
     Directory dba created.
     Directory singlemolecule created.
     Directory supercell created.
