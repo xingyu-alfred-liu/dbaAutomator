@@ -21,7 +21,12 @@ import math
 # getSingleMol finds a singlemolecule with provided crystal and the
 # starting pymatgen site and index
 # return: dict, key is index of the site, value is the site
-def getSingleMol(supercell, middleSite, bondDict, middleSiteIndex):
+def getSingleMol(supercell, middleSite, bondDict, middleSiteIndex, printMol=True):
+    """
+    Args:
+        - printMol: bool
+            if True, print out the single molecule information
+    """
     candidates = [middleSite]
     candidatesIndex = [middleSiteIndex]
     tmpSites = []
@@ -52,7 +57,8 @@ def getSingleMol(supercell, middleSite, bondDict, middleSiteIndex):
             if site[2] not in singleMol.keys():
                 candidates += [site[0]]
                 candidatesIndex += [site[2]]
-        print('Number of atoms found in this molecule:', len(singleMol))
+        if printMol:
+            print('Number of atoms found in this molecule:', len(singleMol))
         tmpSites = []
     return singleMol
 
@@ -60,7 +66,16 @@ def getSingleMol(supercell, middleSite, bondDict, middleSiteIndex):
 # and use getSingleMol return the dictionay using index as key and sites 
 # as values
 # return: same as getSingleMol
-def getCentralSingleMol(supercell, bondDict, middle=[0.5, 0.5, 0.5]):
+def getCentralSingleMol(supercell, bondDict, middle=[0.5, 0.5, 0.5], printMol=True):
+    """
+    Args:
+        - supercell: pymatgen Structure
+        - bondDict: dict
+        - middle: list
+        - printMol: bool
+            if False, then don't print out the single molecule
+            information
+    """
     # check if the frac_coord is smaller than zero
     # if smaller than zero, change the middle site coords to negative
     if min(supercell.frac_coords[:, 0]) < 0:
@@ -73,11 +88,12 @@ def getCentralSingleMol(supercell, bondDict, middle=[0.5, 0.5, 0.5]):
             dist = np.linalg.norm(middle-site.frac_coords)
             middleSite = site
             middleSiteIndex = i
-    print('The site closest to the middle is', middleSite)
-    print('The corresponding site index is', middleSiteIndex)
+    if printMol:
+        print('The site closest to the middle is', middleSite)
+        print('The corresponding site index is', middleSiteIndex)
     # pick up all the atom pairs within bond van der waals distance
     # centralSingleMol is the list of sites which belong to the central molecule
-    centralSingleMol = getSingleMol(supercell, middleSite, bondDict, middleSiteIndex)
+    centralSingleMol = getSingleMol(supercell, middleSite, bondDict, middleSiteIndex, printMol)
     return centralSingleMol
 
 # getBondDict use bondCutoff reference and input structure
