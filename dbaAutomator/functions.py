@@ -11,7 +11,7 @@ import os
 import sys
 import numpy as np
 from copy import deepcopy
-from pymatgen import Molecule
+from pymatgen.core.structure import Molecule
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.io.xyz import XYZ
 from itertools import filterfalse
