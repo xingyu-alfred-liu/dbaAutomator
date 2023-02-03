@@ -7,7 +7,7 @@
 
 import os
 import sys
-from pymatgen import Molecule
+from pymatgen.core.structure import Molecule
 from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.io.xyz import XYZ
 from ase.io import read
