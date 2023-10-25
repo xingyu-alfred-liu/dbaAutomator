@@ -165,7 +165,8 @@ def getHolePositions(chargeMatrix, singleMol, unitcell, bondDict, chargeThreshol
                         tmpBondLength = site[1]
                         removeSite = site
                 twoNeighbors.remove(removeSite)
-        holePositions[charindex] = findHole(unitcell, twoNeighbors, chargeSite, holeAtomDist)
+        if len(twoNeighbors) == 2:
+            holePositions[charindex] = findHole(unitcell, twoNeighbors, chargeSite, holeAtomDist)
     return holePositions
 
 # find out hole position with given structure and charge site and corresponding two
